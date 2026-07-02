@@ -1,0 +1,42 @@
+#define R_INSTRUCTIONS_ARITHMATIC_OPCODES = 0;
+#define R_INSTRUCTIONS_MEMORY_OPCODES = 1;
+
+enum typedef R_INSTRUCTIONS_ARITHMATIC_FUNCTS {
+	ADD=1,
+	SUB,
+	AND,
+	OR,
+	NOR
+};
+
+enum typedef R_INSTRUCTIONS_MEMORY_FUNCTS {
+	MOVE=1,
+	MVHI,
+	MVLO
+};
+
+
+enum typedef I_INSTRUCTIONS_OPCODES {
+	ADDI=10,
+	SUBI,
+	ANDI,
+	ORI,
+	NORI,
+	BNE,
+	BEQ,
+	BLT,
+	BGT,
+	LB,
+	SB,
+	LW,
+	SW,
+	LH,
+	SH
+};
+
+enum typedef J_INSTRUCTIONS_OPCODES {
+	JMP=30,
+	LA,
+	CALL,
+	HLT=63
+};
