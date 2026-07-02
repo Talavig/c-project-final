@@ -95,3 +95,11 @@ enum typedef J_INSTRUCTIONS_OPCODES {
 	CALL,
 	HLT=63
 };
+
+
+typedef enum ATTRIBUTES{
+	CODE,
+	DATA,
+	ENTRY,
+	EXTERNAL
+} Attribute;
