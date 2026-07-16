@@ -1,7 +1,7 @@
 #include "consts.h"
 
-typedef struct SymbolTable{
+typedef struct {
 	char* symbol,
 	int value,
 	Attribute attribute
-}symbol_table;
+}SymbolTable;

@@ -1,6 +1,6 @@
 
 
 
-void firstPass(){
+void firstPass(char * code_to_assemble){
 
 }

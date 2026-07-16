@@ -13,6 +13,7 @@
  */
 #define MAX_LABEL_LENGTH 31
 #define MAX_ASSEMBLY_LINE_COUNT 10000
+#define MAX_SINGLE_LINE_LENGTH 80
 
 
 /*
@@ -97,9 +98,19 @@ enum typedef J_INSTRUCTIONS_OPCODES {
 };
 
 
-typedef enum ATTRIBUTES{
+typedef enum {
 	CODE,
 	DATA,
 	ENTRY,
 	EXTERNAL
 } Attribute;
+
+typedef enum {
+	FALSE,
+	TRUE
+} Boolean;
+
+typedef enum {
+	FAILURE,
+	SUCCESS
+} Status;
