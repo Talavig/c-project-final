@@ -17,6 +17,15 @@
 
 
 /*
+ * file extentions
+ */
+#define INPUT_ASSEMBLY_FILE ".as"
+#define MACRO_ASSEMBLY_FILE ".am"
+#define OUTPUT_OBJECT_FILE ".ob"
+#define OUTPUT_EXTERNALS_FILE "ext"
+#define OUTPUT_ENTRIES_FILE ".ent"
+
+/*
  * max data types sizes in bytes
  */
 

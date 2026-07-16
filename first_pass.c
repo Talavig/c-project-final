@@ -7,11 +7,10 @@ Boolean isValidLabel(char * str){
 
 }
 
+else if (firstPass(file_base_name, &symbol_table, &ic, &dc) == FAILURE);
 
 
-Status firstPass(char * file_base_name){
-	int IC = IC_INITIAL_VALUE;
-	int DC = DC_INITIAL_VALUE;
+Status firstPass(char * file_base_name, SymbolTable* sybol_table, int* ic, int* dc){
 	char * current_line[MAX_SINGLE_LINE_LENGTH + 2];
 	int line_counter = 0;
 
@@ -24,4 +23,5 @@ Status firstPass(char * file_base_name){
 
 		//TODO: check if the first part of the line is a valid label
 	}
+	return SUCCESS;
 }

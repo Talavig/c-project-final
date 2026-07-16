@@ -23,15 +23,15 @@ int main(int argc, char *argv[]){
 
 		}
 		else if (firstPass(file_base_name, &symbol_table, &ic, &dc) == FAILURE){
-			free_symbol_table(symbol_table);
+			freeSymbolTable(symbol_table);
 		}
 		else if (secondPass(file_base_name, symbol_table, ic, dc) == FAILURE){
-			free_symbol_table(symbol_table);
+			freeSymbolTable(symbol_table);
 		}
 		else{
 			generate_output_files(file_base_name, symbol_table, ic, dc);
 		}
-		free_symbol_table(symbol_table);
+		freeSymbolTable(symbol_table);
 	}
 
 
