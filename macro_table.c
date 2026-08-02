@@ -8,18 +8,78 @@
 
 MacroTableEntry* findMacro(MacroTableEntry* start, const char* name){
 
+	MacroTableEntry *current = start;
+	while (current != NULL){
+		if (strcmp(current->name, name) == 0) {
+			return current;
+		}
+		current = current->next;
+	}
+	return NULL;
 }
 
-void addMacroToTable(MacroTableEntry** start, const char* name){
+Status addMacroToTable(MacroTableEntry** start, const char* name){
+	MacroTableEntry *new_macro = (MacroTableEntry*)malloc(sizeof(MacroTableEntry));
 
+	if (new_macro == NULL) {
+		fprintf(stderr, ERR_MACRO_ALLOC_FAILED);
+		return FAILURE;
+	}
+
+	new_macro->name = (char*)malloc(strlen(name) + 1);
+	if (new_macro->name == NULL) {
+		fprintf(stderr, ERR_MACRO_NAME_ALLOC_FAILED);
+		free(new_macro);
+		return FAILURE;
+	}
+	else{
+		strcpy(new_macro->name, name);
+		new_macro->content = NULL;
+		new_macro->next = *start;
+		*start = new_macro;
+		return SUCCESS;
+	}
 }
 
-void addLineToMacro(MacroTableEntry* macro, const char* line){
+Status addLineToMacro(MacroTableEntry* macro, const char* line){
+	if (macro == NULL || line == NULL) {
+		return FAILURE;
+	}
 
+	if (macro->content == NULL){
+		macro->content = (char*)malloc(strlen(line) + 1);
+		if (macro->content == NULL) {
+			fprintf(stderr, ERR_MACRO_CONTENT_ALLOC_FAILED);
+			return FAILURE;
+		}
+		strcpy(macro->content, line);
+	}
+	else{
+		macro->content = (char*)realloc(macro->content, strlen(macro->content) + strlen(line) + 1);
+		if (macro->content == NULL){
+			fprintf(stderr, ERR_MACRO_CONTENT_REALLOC_FAILED);
+			return FAILURE;
+		}
+		strcat(macro->content, line);
+	}
+	return SUCCESS;
 }
 
 void freeMacroTable(MacroTableEntry* start){
+	MacroTableEntry *current = start;
+	MacroTableEntry *next_entry;
 
+	while (current != NULL){
+		next_entry = current->next;
+		free(current->name);
+
+		if (current->content != NULL) {
+			free(current->content);
+		}
+		free(current);
+
+		current = next_node;
+	}
 }
 
 Boolean checkMacroName(const char *name){
@@ -27,5 +87,18 @@ Boolean checkMacroName(const char *name){
 }
 
 Boolean checkMacroLine(const char *line){
+	char parta[MAX_SINGLE_LINE_LENGTH + 2] = {0};
+	char partb[MAX_SINGLE_LINE_LENGTH + 2] = {0};
+	char partc[MAX_SINGLE_LINE_LENGTH + 2] = {0};
+
+	int parsed_words = sscanf(line, "%s %s %s", parta, partb, partc);
+
+	if (strcmp(word1, MACRO_END_CMD) == 0){
+		return (parsed_words == 1) ? TRUE : FALSE;
+	}
+
+	if (strcmp(word1, MACRO_START_CMD) == 0){
+		return (parsed_words == 2) ? TRUE : FALSE;
+	}
 	return TRUE;
 }

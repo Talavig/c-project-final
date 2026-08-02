@@ -71,7 +71,9 @@ Status preprocessScript(char * file_base_name){
 		/* skip empty lines\comments */
 		else if (first_word[0] == END_OF_STRING){
 			if (is_macro){
-				addLineToMacro(current_macro, current_line)
+				if (addLineToMacro(current_macro, current_line) == FAILURE){
+					run_status = FAILURE;
+				}
 			}
 			else{
 				fputs(current_line, output_file);
@@ -81,7 +83,7 @@ Status preprocessScript(char * file_base_name){
 		/* currenly defining a macro */
 		else if (is_macro){
 			if (strcmp (first_word, MACRO_END) == 0){
-				if (hasExtraCharacters(current_line, MACRO_END)){
+				if (checkMacroLine(current_line) == FALSE){
 					ASM_ERROR(line_counter, (ERR_EXTRA_CHARS_MACRO_END));
 					run_status = FAILURE;
 				}
@@ -89,7 +91,9 @@ Status preprocessScript(char * file_base_name){
 				current_macro = NULL;
 			}
 			else {
-				addLineToMacro(current_macro, current_line);
+				if (addLineToMacro(current_macro, current_line) == FAILURE){
+					run_status = FAILURE;
+				}
 			}
 		}
 
@@ -98,13 +102,15 @@ Status preprocessScript(char * file_base_name){
 			memset(macro_name, 0, sizeof(macro_name));
 			sscanf(current_line, MACRO_START_CMD " %s", macro_name);
 
-			if(!checkMacroName(macro_name) || checkMacroLine(current_line, macro_name)){
+			if(!checkMacroName(macro_name) || checkMacroLine(current_line) == FALSE){
 				ASM_ERROR(line_counter, (ERR_INVALID_MACRO_DEF, macro_name));
 				run_status = FAILURE;
 			}
 
 			is_macro = TRUE;
-			addMacro(&macro_table, macro_name);
+			if (addMacroToTable(&macro_table, macro_name) == FAILURE) {
+				run_status = FAILURE;
+			}
 			current_macro = findMacro(macro_table, macro_name);
 		}
 

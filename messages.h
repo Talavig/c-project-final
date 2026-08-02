@@ -20,4 +20,9 @@
 #define ERR_EXTRA_CHARS_MACRO_END "Extra characters after 'mcroend'."
 #define ERR_INVALID_MACRO_DEF "Invalid macro definition: '%s'."
 
+#define ERR_MACRO_ALLOC_FAILED "Internal Error: Memory allocation failed for new macro.\n"
+#define ERR_MACRO_NAME_ALLOC_FAILED "Internal Error: Memory allocation failed for macro name.\n"
+#define ERR_MACRO_CONTENT_ALLOC_FAILED "Internal Error: Memory allocation failed for macro content.\n"
+#define ERR_MACRO_CONTENT_REALLOC_FAILED "Internal Error: Memory reallocation failed for macro content.\n"
+
 #endif

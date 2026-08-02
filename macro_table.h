@@ -1,3 +1,6 @@
+#ifndef MACRO_TABLE_H
+#define MACRO_TABLE_H
+
 #include "consts.h"
 
 typedef struct MacroTableEntry{
@@ -7,9 +10,10 @@ typedef struct MacroTableEntry{
 }MacroTableEntry;
 
 MacroTableEntry* findMacro(MacroTableEntry* start, const char* name);
-void addMacroToTable(MacroTableEntry** start, const char* name);
-void addLineToMacro(MacroTableEntry* macro, const char* line);
+Status addMacroToTable(MacroTableEntry** start, const char* name);
+Status addLineToMacro(MacroTableEntry* macro, const char* line);
 void freeMacroTable(MacroTableEntry* start);
 Boolean checkMacroName(const char *name);
 Boolean checkMacroLine(const char *line);
 
+#endif
