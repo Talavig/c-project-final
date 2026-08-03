@@ -19,9 +19,9 @@ Status firstPass(char * file_base_name, SymbolTable* sybol_table, int* ic, int* 
 	Boolean has_label =  FALSE;
 	char label_name[MAX_LABEL_LENGTH];
 	char *current_line_ptr;
-	char token[MAX_LABEL_LENGTH];
+	char token[MAX_TOKEN_LENGTH];
 	int token_len;
-	char operands[MAX_OPERANDS_PER_LINE][MAX_LABEL_LENGTH];
+	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
 
 

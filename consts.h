@@ -12,6 +12,7 @@
  * file and assembler limits related consts
  */
 #define MAX_LABEL_LENGTH 31
+#define MAX_TOKEN_LENGTH 32 /* 31 for max label + 1 for \0*/
 #define MAX_ASSEMBLY_LINE_COUNT 10000
 #define MAX_SINGLE_LINE_LENGTH 80
 #define MAX_OPERANDS_PER_LINE 40 /* derived from 80 - 3 chars for data decleration / 2 for comma and value*/
@@ -32,7 +33,7 @@
 
 #define DB_SIZE 1
 #define DH_SIZE 2
-#define SIZE_DW 4
+#define DW_SIZE 4
 
 /*
  * special characters
@@ -67,6 +68,7 @@
 
 #define R_INSTRUCTIONS_ARITHMATIC_OPCODES 0
 #define R_INSTRUCTIONS_MEMORY_OPCODES 1
+#define NON_R_FUNCT_VALUE 0
 
 typedef enum R_INSTRUCTIONS_ARITHMATIC_FUNCTS {
 	ADD=1,
@@ -101,12 +103,12 @@ typedef enum I_INSTRUCTIONS_OPCODES {
 	SH
 } I_INSTRUCTIONS_OPCODES;
 
-enum typedef J_INSTRUCTIONS_OPCODES {
+typedef enum J_INSTRUCTIONS_OPCODES {
 	JMP=30,
 	LA,
 	CALL,
 	HLT=63
-};
+} J_INSTRUCTIONS_OPCODES;
 
 
 typedef enum {
@@ -125,3 +127,58 @@ typedef enum {
 	FAILURE,
 	SUCCESS
 } Status;
+
+/*
+ * connsts for specific command types
+ *
+ */
+
+typedef enum {
+	R_TYPE,
+	I_TYPE,
+	J_TYPE
+} InstructionType;
+
+typedef struct {
+	char *name,
+	InstructionType type,
+	int opcode,
+	int oprands,
+	int funct
+} Instruction;
+
+Instruction instructions[] = {
+		{"add", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, ADD},
+		{"sub", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, SUB},
+		{"and", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, AND},
+		{"or", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, OR},
+		{"nor", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, NOR},
+
+		{"move", R_TYPE, R_INSTRUCTIONS_MEMORY_OPCODES, 2, MOVE},
+		{"mvhi", R_TYPE, R_INSTRUCTIONS_MEMORY_OPCODES, 2, MVHI},
+		{"mvlo", R_TYPE, R_INSTRUCTIONS_MEMORY_OPCODES, 2, MVLO},
+
+		{"addi", I_TYPE, ADDI, 3, NON_R_FUNCT_VALUE},
+		{"subi", I_TYPE, SUBI, 3, NON_R_FUNCT_VALUE},
+		{"andi", I_TYPE, ANDI, 3, NON_R_FUNCT_VALUE},
+		{"ori", I_TYPE, ORI, 3, NON_R_FUNCT_VALUE},
+		{"nori", I_TYPE, NORI, 3, NON_R_FUNCT_VALUE},
+
+		{"bne", I_TYPE, BNE, 3, NON_R_FUNCT_VALUE},
+		{"beq", I_TYPE, BEQ, 3, NON_R_FUNCT_VALUE},
+		{"blt", I_TYPE, BLT, 3, NON_R_FUNCT_VALUE},
+		{"bgt", I_TYPE, BGT, 3, NON_R_FUNCT_VALUE},
+
+		{"lb", I_TYPE, LB, 3, NON_R_FUNCT_VALUE},
+		{"sb", I_TYPE, SB, 3, NON_R_FUNCT_VALUE},
+		{"lw", I_TYPE, LW, 3, NON_R_FUNCT_VALUE},
+		{"sw", I_TYPE, SW, 3, NON_R_FUNCT_VALUE},
+		{"lh", I_TYPE, LH, 3, NON_R_FUNCT_VALUE},
+		{"sh", I_TYPE, SH, 3, NON_R_FUNCT_VALUE},
+
+		{"jmp", J_TYPE, JMP, 1, NON_R_FUNCT_VALUE},
+		{"la", J_TYPE, LA, 1, NON_R_FUNCT_VALUE},
+		{"call", J_TYPE, CALL, 1, NON_R_FUNCT_VALUE},
+		{"hlt", J_TYPE, HLT, 1, NON_R_FUNCT_VALUE},
+
+};
