@@ -2,4 +2,5 @@
 
 
 
-void remove_blanks(char *str_input)
+char *skipWhitespaces(char *str);
+Boolean getNextToken(char **src, char *dest);

@@ -25,4 +25,7 @@
 #define ERR_MACRO_CONTENT_ALLOC_FAILED "Internal Error: Memory allocation failed for macro content.\n"
 #define ERR_MACRO_CONTENT_REALLOC_FAILED "Internal Error: Memory reallocation failed for macro content.\n"
 
+
+#define ERR_INCOMPLETE_LABEL "Error in line %d: Label without instruction/directive.\n"
+#define ERR_UNKNOWN_INSTRUCTION "Error in line %d: Unknown instruction or directive '%s'\n"
 #endif

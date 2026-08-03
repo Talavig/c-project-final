@@ -1,19 +1,36 @@
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "consts.h"
 
 
 
+char *skipWhitespaces(char *str) {
+	if (str == NULL) return NULL;
+
+	while (*str != '\0' && isspace((unsigned char)*str)) {
+		str++;
+	}
+	return str;
+}
 
 
-
-void remove_blanks(char *str_input) {
-	int blankless_string_index = 0; /* an index used to follow the spaceless substring */
+Boolean getNextToken(char **src, char *dest) {
 	int i = 0;
-	while (str_input[i] != STRING_TERMINATE)
-	{
-		if (!isspace(str_input[i])){
-			str_input[blankless_string_index] = str_input[i];
-			blankless_string_index++;
-		}
+
+	*src = skipWhitespaces(*src);
+	if (**src == '\0') {
+		dest[0] = '\0';
+		return FALSE;
+	}
+
+	while (**src != '\0' && !isspace((unsigned char)**src) && **src != ','){
+		dest[i] = **src;
+		(*src)++;
 		i++;
 	}
-	str_input[blankless_string_index] = '\0';
+
+	dest[i] = '\0';
+	return TRUE;
 }

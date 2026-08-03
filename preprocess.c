@@ -27,10 +27,10 @@ Status preprocessScript(char * file_base_name){
 	input_file_name = (char *)malloc(strlen(file_base_name) + 4);
 	output_file_name = (char *)malloc(strlen(file_base_name) + 4);
 
-	if (input_filename == NULL || output_filename == NULL) {
+	if (input_file_name == NULL || output_file_name == NULL) {
 		fprintf(stderr, ERR_ALLOCATION_FAILED);
-		free(input_filename);
-		free(output_filename);
+		free(input_file_name);
+		free(output_file_name);
 		return FAILURE;
 	}
 
@@ -46,7 +46,7 @@ Status preprocessScript(char * file_base_name){
 		fprintf(stderr, ERR_CANNOT_OPEN_FILE, input_file_name);
 		free(input_file_name);
 		free(output_file_name);
-		return FAILURE
+		return FAILURE;
 	}
 
 	if((output_file = fopen(output_file_name, "w")) == NULL){
@@ -57,7 +57,7 @@ Status preprocessScript(char * file_base_name){
 		return FAILURE
 	}
 
-	while (fgets(current_line, sizeof(line), file) != NULL){
+	while (fgets(current_line, sizeof(current_line), input_file) != NULL){
 
 		/* increment line count, reset first word buffer */
 		line_counter++;
@@ -141,7 +141,7 @@ Status parseLine(char *line, int line_counter, char *first_word, FILE *input_fil
 
 
 	/* check single line length not passing 80 characters*/
-	if (strchr(line, "\n") == NULL && !feof(input_file)){
+	if (strchr(line, '\n') == NULL && !feof(input_file)){
 		/* print an errpr and clean the buffer */
 		ASM_ERROR(line_counter, ("Line exceeds maximum length of 80 characters."));
 
@@ -159,7 +159,7 @@ Status parseLine(char *line, int line_counter, char *first_word, FILE *input_fil
 		return SUCCESS;
 	}
 
-	while (!isspace(*pre) && *ptr == END_OF_STRING && i < MAX_LABEL_LENGTH){
+	while (!isspace(*ptr) && *ptr == END_OF_STRING && i < MAX_LABEL_LENGTH){
 		first_word[i] = *ptr;
 		ptr++;
 		i++;
