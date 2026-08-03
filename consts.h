@@ -14,6 +14,7 @@
 #define MAX_LABEL_LENGTH 31
 #define MAX_ASSEMBLY_LINE_COUNT 10000
 #define MAX_SINGLE_LINE_LENGTH 80
+#define MAX_OPERANDS_PER_LINE 40 /* derived from 80 - 3 chars for data decleration / 2 for comma and value*/
 
 
 /*

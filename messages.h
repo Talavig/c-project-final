@@ -28,4 +28,12 @@
 
 #define ERR_INCOMPLETE_LABEL "Error in line %d: Label without instruction/directive.\n"
 #define ERR_UNKNOWN_INSTRUCTION "Error in line %d: Unknown instruction or directive '%s'\n"
+
+#define ERR_OPERAND_FIRST_COMMA "Error: Illegal comma before the first operand.\n"
+#define ERR_CONSECUTIVE_COMMAS "Error: Multiple consecutive commas.\n"
+#define ERR_MISSING_COMMA "Error in line %d: Missing comma between operands.\n"
+#define ERR_TOO_MANY_OPRANDS "Error in line %d: Too many operands.\n"
+#define ERR_TOO_MANY_COMMAS "Error in line %d: Too many comma at the end of the line.\n"
+
+
 #endif

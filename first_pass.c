@@ -21,6 +21,8 @@ Status firstPass(char * file_base_name, SymbolTable* sybol_table, int* ic, int* 
 	char *current_line_ptr;
 	char token[MAX_LABEL_LENGTH];
 	int token_len;
+	char operands[MAX_OPERANDS_PER_LINE][MAX_LABEL_LENGTH];
+	int operand_count = 0;
 
 
 	macro_file_name = (char *)malloc(strlen(file_base_name) + 4);
@@ -60,14 +62,12 @@ Status firstPass(char * file_base_name, SymbolTable* sybol_table, int* ic, int* 
 					}
 				}
 				else if(isDataDirective(token)){
-
+					handleDataDirective();
 				}
 				else if(isExternDirective(token)){
-
+					handleExternDirective();
 				}
-				else if(isEntryDirective(token)){
-
-				}
+				/* entry directives are handled in teh second pass */
 				else if(isInstruction(token)){
 					if (has_label){
 
@@ -87,7 +87,7 @@ Status firstPass(char * file_base_name, SymbolTable* sybol_table, int* ic, int* 
 	if (pass_status == FAILURE){
 		return FAILURE;
 	}
-	else {
+	else{
 
 		return SUCCESS;
 	}
