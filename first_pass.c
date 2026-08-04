@@ -280,6 +280,11 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
 	unsigned long machine_code = 0;
+	int rs = 0, rt = 0, rd = 0;
+	int immed = 0;
+	int funct = 0;
+	int reg = 0;
+	long address = 0;
 
 	if (has_label) {
 		if (findSymbol(SymbolTable symbol_table, label_name) == NULL){
@@ -318,5 +323,18 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 
 	machine_code |= (instruction->opcode << OPCODE_SHIFT);
 
+	if (instruction->type == R_TYPE) {
 
+	}
+
+	else if (inst_def->type == I_TYPE) {
+
+	}
+
+	else if (inst_def->type == J_TYPE) {
+
+	}
+
+	*ic += INSTRUCTION_BYTES_SIZE;
+	return SUCCESS;
 }
