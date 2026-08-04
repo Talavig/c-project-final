@@ -83,7 +83,13 @@ void freeMacroTable(MacroTableEntry* start){
 }
 
 Boolean checkMacroName(const char *name){
-	return TRUE;
+	int i;
+	for (i = 0; i < NUM_INSTRUCTIONS; i++){
+		if (strcmp(instructions[i]->name, name) == 0){
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 Boolean checkMacroLine(const char *line){

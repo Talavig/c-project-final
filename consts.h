@@ -69,6 +69,7 @@
 #define R_INSTRUCTIONS_ARITHMATIC_OPCODES 0
 #define R_INSTRUCTIONS_MEMORY_OPCODES 1
 #define NON_R_FUNCT_VALUE 0
+#define NUM_INSTRUCTIONS = 27
 
 typedef enum R_INSTRUCTIONS_ARITHMATIC_FUNCTS {
 	ADD=1,
@@ -112,10 +113,11 @@ typedef enum J_INSTRUCTIONS_OPCODES {
 
 
 typedef enum {
-	CODE,
-	DATA,
-	ENTRY,
-	EXTERNAL
+	NONE = 0,
+	CODE = 1,
+	DATA = 2,
+	ENTRY = 4,
+	EXTERNAL = 8
 } Attribute;
 
 typedef enum {

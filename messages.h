@@ -35,5 +35,7 @@
 #define ERR_TOO_MANY_OPRANDS "Error in line %d: Too many operands.\n"
 #define ERR_TOO_MANY_COMMAS "Error in line %d: Too many comma at the end of the line.\n"
 
+#define ERR_SYMBOL_TABLE_MEMORY_ALLOCATION_FAILED "Error: Memory allocation failed for symbol table node.\n"
+#define ERR_SYMBOL_TABLE_STRING_MEMORY_ALLOCATION_FAILED "Error: Memory allocation failed for symbol string.\n"
 
 #endif

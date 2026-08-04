@@ -10,7 +10,7 @@ Boolean isValidLabel(char * str){
 else if (firstPass(file_base_name, &symbol_table, &ic, &dc) == FAILURE);
 
 
-Status firstPass(char * file_base_name, SymbolTable* sybol_table, int* ic, int* dc){
+Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char[] *data_image, unsigned int[]* code_image){
 	char * current_line[MAX_SINGLE_LINE_LENGTH + 2];
 	int line_counter = 0;
 	FILE *macro_file;
@@ -58,16 +58,16 @@ Status firstPass(char * file_base_name, SymbolTable* sybol_table, int* ic, int* 
 
 					if (!getNextToken(&ptr, token)){
 						ASM_ERROR(line_counter, (ERR_INCOMPLETE_LABEL));
-						Status pass_status = FAILURE;
+						pass_status = FAILURE;
 					}
 				}
-				else if(isDataDirective(token)){
-					handleDataDirective();
+				else if(isDataDirective(token) && handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, DataImage *data_image, int line_counter) == FAILURE){
+					pass_status = FAILURE;
 				}
 				else if(isExternDirective(token)){
 					handleExternDirective();
 				}
-				/* entry directives are handled in teh second pass */
+				/* entry directives are handled in the second pass */
 				else if(isInstruction(token)){
 					if (has_label){
 
@@ -114,17 +114,25 @@ Boolean isEntryDirective(char *token){
 }
 
 Boolean isInstruction(char* token){
-	return TRUE;
+	int i;
+	for (i = 0; i < NUM_INSTRUCTIONS; i++){
+		if (strcmp(instructions[i]->name, name) == 0){
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
-Boolean handleDataDirective(){
+Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, DataImage *data_image, int line_counter){
+	if(has_label){
+
+	}
+}
+
+Status handleExternDirective(){
 
 }
 
-Boolean handleExternDirective(){
-
-}
-
-Boolean handleInstruction(){
+Status handleInstruction(){
 
 }
