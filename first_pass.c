@@ -60,11 +60,11 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 						pass_status = FAILURE;
 					}
 				}
-				else if(isDataDirective(token) && handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, DataImage *data_image, int line_counter) == FAILURE){
+				else if(isDataDirective(token) && handleDataDirective(&line, token, has_label, label_name, &symbol_table, dc, data_image, line_counter) == FAILURE){
 					pass_status = FAILURE;
 				}
-				else if(isExternDirective(token)){
-					handleExternDirective();
+				else if((isExternDirective(token) || isEntryDirective(token)) && handleEDirective(&line, token, has_label, label_name, &symbol_table, dc, data_image, line_counter) == FAILURE){
+					pass_status = FAILURE;
 				}
 				/* entry directives are handled in the second pass */
 				else if(isInstruction(token)){
@@ -130,6 +130,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 	int tmp_dc = *dc;
 	int data_size;
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
+	int operand_count;
 	int i;
 	long data_content;
 	long data_content_limit_min;
@@ -214,8 +215,66 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 	return SUCCESS;
 }
 
-Status handleExternDirective(){
+Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char[] *data_image, int line_counter){
+	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
+	int operand_count;
+	SymbolTableNode *existing_symbol;
+	SymbolTableEntry new_entry;
 
+	if (has_label) {
+		ASM_WARNING(line_counter, (WARN_LABEL_BEFORE_DIRECTIVE, label_name, directive));
+	}
+
+	if (extractOperands(ptr, operands, &operand_count, line_counter) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (operand_count == 0) {
+		ASM_ERROR(line_counter, (ERR_MISSING_OPRAND_E_DIRECTIVE, directive));
+		return FAILURE;
+	}
+	else if (operand_count > 1) {
+		ASM_ERROR(line_counter, (ERR_TOO_MANY_OPRANDS_E_DIRECTIVE, directive));
+		return FAILURE;
+	}
+
+	if (strcmp(directive, EXTERN_DIRECTIVE) == 0){
+		existing_symbol = findSymbol(*symbol_table, operands[0]);
+		if(existing_symbol == NULL){
+			new_entry.symbol = (char *)malloc(strlen(operands[0]) + 1);
+			if (new_entry.symbol == NULL) {
+				ASM_ERROR(line_counter, (ERR_SYMBOL_TABLE_STRING_MEMORY_ALLOCATION_FAILED));
+				return FAILURE;
+			}
+			strcpy(new_entry.symbol, operands[0]);
+			new_entry.value = 0;
+			new_entry.attributes = EXTERNAL;
+
+			if (addEntryToSymbolTable(symbol_table, new_entry) == FAILURE) {
+				free(new_entry.symbol);
+				return FAILURE;
+			}
+		}
+
+		else{
+			existing_symbol = findSymbol(*symbol_table, operands[0]);
+			if (existing_symbol != NULL) {
+				if(existing_symbol->entry.attributes & ATTR_CODE){
+					ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE, existing_symbol->entry.name));
+					return FAILURE;
+				}
+				if(existing_symbol->entry.attributes & ATTR_DATA){
+					ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA, existing_symbol->entry.name));
+					return FAILURE;
+				}
+			}
+		}
+		return SUCCESS;
+	}
+
+	else if (strcmp(directive, ENTRY_DIRECTIVE) == 0) {
+		return SUCCESS;
+	}
 }
 
 Status handleInstruction(){
