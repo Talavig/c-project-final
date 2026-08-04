@@ -67,11 +67,8 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 					pass_status = FAILURE;
 				}
 				/* entry directives are handled in the second pass */
-				else if(isInstruction(token)){
-					if (has_label){
-
-					}
-					*ic += INSTRUCTION_BYTES_SIZE;
+				else if(isInstruction(token) && handleInstruction(&line, token, has_label, label_name, &symbol_table, ic, code_image, line_counter) == FAILURE)){
+					pass_status = FAILURE;
 				}
 				else{
 					ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, token));
@@ -277,6 +274,49 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 	}
 }
 
-Status handleInstruction(){
+Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned int[]* *code_image, int line_counter){
+	SymbolTableEntry code_entry;
+	Instruction * instruction;
+	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
+	int operand_count = 0;
+	unsigned long machine_code = 0;
+
+	if (has_label) {
+		if (findSymbol(SymbolTable symbol_table, label_name) == NULL){
+			code_entry = (SymbolTableEntry*)malloc(sizeof(SymbolTableEntry));
+			code_entry.symbol = (char *)malloc(strlen(label_name) + 1);
+			strcpy(code_entry.symbol, label_name);
+			code_entry.value = *ic;
+			code_entry.attributes = CODE;
+			if(addEntryToSymbolTable(symbol_table, code_entry) == FAILURE){
+				ASM_ERROR(line_counter, (ERR_DATA_DIRECTIVE_SYMBOL_ADDITION_FAILED));
+				free(code_entry);
+				return FAILURE;
+			}
+
+		}
+	}
+	instruction = getInstruction(instruction);
+	if (instruction == NULL) {
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, instruction));
+		return FAILURE;
+	}
+
+	if (extractOperands(ptr, operands, &operand_count, line_counter) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (operand_count < inst_def->expected_operands) {
+		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_LOW, instruction, inst_def->expected_operands, operand_count));
+		return FAILURE;
+	}
+
+	else if (operand_count > inst_def->expected_operands) {
+		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_HIGH, instruction, inst_def->expected_operands, operand_count));
+		return FAILURE;
+	}
+
+	machine_code |= (instruction->opcode << OPCODE_SHIFT);
+
 
 }

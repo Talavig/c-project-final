@@ -83,3 +83,14 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 	}
 	return SUCCESS;
 }
+
+
+Instruction * getInstruction(char* instruction_name){
+	int i;
+	for (i = 0; i < NUM_INSTRUCTIONS; i++) {
+		if (strcmp(instructions[i].name, name) == 0) {
+			return &instructions[i];
+		}
+	}
+	return NULL;
+}

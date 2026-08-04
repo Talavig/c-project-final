@@ -60,8 +60,9 @@
 #define ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE "Symbol %s declared extern was already defined in this file as code."
 #define ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA "Symbol %s declared extern was already defined in this file as data."
 
-
-
+#define ERR_UNKNOWN_INSTRUCTION "Unknown instruction '%s'."
+#define ERR_INSTRUCTION_OPRAND_COUNT_LOW "Instruction '%s' got too little arguments expects %d operands, got %d."
+#define ERR_INSTRUCTION_OPRAND_COUNT_HIGH "Instruction '%s' got too many arguments expects %d operands, got %d."
 
 
 

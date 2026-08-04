@@ -7,7 +7,6 @@
 #define IC_INITIAL_VALUE 100
 #define DC_INITIAL_VALUE 0
 #define INSTRUCTION_BYTES_SIZE 4
-#define BYTE_MASK 0xFF
 
 /*
  * file and assembler limits related consts
@@ -182,6 +181,20 @@ Instruction instructions[] = {
 		{"jmp", J_TYPE, JMP, 1, NON_R_FUNCT_VALUE},
 		{"la", J_TYPE, LA, 1, NON_R_FUNCT_VALUE},
 		{"call", J_TYPE, CALL, 1, NON_R_FUNCT_VALUE},
-		{"hlt", J_TYPE, HLT, 1, NON_R_FUNCT_VALUE},
-
+		{"hlt", J_TYPE, HLT, 1, NON_R_FUNCT_VALUE}
 };
+
+/*
+ * bitshift consts
+ */
+
+#define OPCODE_SHIFT 26
+#define RS_SHIFT 21
+#define RT_SHIFT 16
+#define RD_SHIFT 11
+#define FUNCT_SHIFT 6
+#define REG_JUMP_SHIFT 25
+
+#define BYTE_MASK 0xFF
+#define IMMED_MASK 0xFFFF
+#define ADDRESS_MASK 0x1FFFFFF

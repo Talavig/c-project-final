@@ -7,3 +7,6 @@ Boolean getNextToken(char **src, char *dest);
 
 
 Status extractOperands(char **ptr, char operands[][MAX_TOKEN_LENGTH], int *operand_count);
+
+
+Instruction * getInstruction(char* instruction_name);
