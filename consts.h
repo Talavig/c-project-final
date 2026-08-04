@@ -7,6 +7,7 @@
 #define IC_INITIAL_VALUE 100
 #define DC_INITIAL_VALUE 0
 #define INSTRUCTION_BYTES_SIZE 4
+#define BYTE_MASK 0xFF
 
 /*
  * file and assembler limits related consts

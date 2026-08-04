@@ -44,6 +44,7 @@
 #define ERR_MISSING_CLOSING_QUOTES "Error: Not found missing quote for .asciz."
 
 #define ERR_MISSING_OPERANDS_DATA_DIRECTIVE "Error: Missing operands for data directive."
+#define ERR_DATA_NOT_FIT_FOR_TYPE "Error: Data item %l not fitting for %s data type."
 
 
 

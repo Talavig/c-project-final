@@ -1,4 +1,6 @@
 
+#include <limits.h>
+
 #include "consts.h"
 #include "utils.h"
 #include "symbol_table.h"
@@ -122,26 +124,33 @@ Boolean isInstruction(char* token){
 
 Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char[] *data_image, int line_counter){
 	SymbolTableEntry data_entry;
-	data_entry = (SymbolTableEntry*)malloc(sizeof(SymbolTableEntry));
 	char ** first_quote;
 	char ** last_quote;
 	char ** line_ptr;
 	int tmp_dc = *dc;
 	int data_size;
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
+	int i;
+	long data_content;
+	long data_content_limit_min;
+	long data_content_limit_max;
 
 	int operand_count = 0;
-	data_size = (strcmp(directive, DB_DIRECTIVE) == 0) ? DB_SIZE : (strcmp(directive, DW_DIRECTIVE) == 0) ? DW_SIZE : DH_SIZE;
+	data_size = (strcmp(directive, DB_DIRECTIVE) == 0) ? DB_SIZE : (strcmp(directive, DH_DIRECTIVE) == 0) ? DH_SIZE : DW_SIZE;
+	data_content_limit_min = (strcmp(directive, DB_DIRECTIVE) == 0) ? SCHAR_MIN : (strcmp(directive, DH_DIRECTIVE) == 0) ? SHRT_MIN : INT_MIN;
+	data_content_limit_max = (strcmp(directive, DB_DIRECTIVE) == 0) ? SCHAR_MAX : (strcmp(directive, DH_DIRECTIVE) == 0) ? SHRT_MAX : INT_MAX;
 
 
 	if (has_label) {
 		if (findSymbol(SymbolTable symbol_table, label_name) == NULL){
+			data_entry = (SymbolTableEntry*)malloc(sizeof(SymbolTableEntry));
 			data_entry.symbol = (char *)malloc(strlen(label_name) + 1);
 			strcpy(data_entry.symbol, label_name);
 			data_entry.value = *dc;
 			data_entry.attributes = DATA;
 			if(addEntryToSymbolTable(symbol_table, data_entry) == FAILURE){
 				ASM_ERROR(line_counter, (ERR_DATA_DIRECTIVE_SYMBOL_ADDITION_FAILED));
+				free(data_entry);
 				return FAILURE;
 			}
 
@@ -180,6 +189,26 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 		if (operand_count == 0) {
 			ASM_ERROR(line_counter, (ERR_MISSING_OPERANDS_DATA_DIRECTIVE));
 			return FAILURE;
+		}
+
+		for(i = 0; i < operand_count; i++){
+			data_content = atol(operands[i]);
+			if (data_content >= data_content_limit_max || data_content <= data_content_limit_min){
+				ASM_ERROR(line_counter, (ERR_DATA_NOT_FIT_FOR_TYPE, data_content, directive));
+				return FAILURE
+			}
+
+			if (data_size == DB_SIZE) {
+				data_image[*dc] = value & BYTE_MASK;
+			}
+			if (data_size == DH_SIZE) {
+				data_image[*dc + 1] = (value >> 8) & BYTE_MASK;
+			}
+			if (data_size == DW_SIZE){
+				data_image[*dc + 2] = (value >> 16) & BYTE_MASK;
+				data_image[*dc + 3] = (value >> 24) & BYTE_MASK;
+			}
+			*dc += data_size
 		}
 	}
 	return SUCCESS;
