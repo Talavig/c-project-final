@@ -1,13 +1,10 @@
 
 #include "consts.h"
 #include "utils.h"
+#include "symbol_table.h"
 
 
-Boolean isValidLabel(char * str){
-
-}
-
-else if (firstPass(file_base_name, &symbol_table, &ic, &dc) == FAILURE);
+Boolean isValidLabel(char * str);
 
 
 Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char[] *data_image, unsigned int[]* code_image){
@@ -72,7 +69,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 					if (has_label){
 
 					}
-					*ic += 4;
+					*ic += INSTRUCTION_BYTES_SIZE;
 				}
 				else{
 					ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, token));
@@ -123,10 +120,69 @@ Boolean isInstruction(char* token){
 	return FALSE;
 }
 
-Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, DataImage *data_image, int line_counter){
-	if(has_label){
+Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char[] *data_image, int line_counter){
+	SymbolTableEntry data_entry;
+	data_entry = (SymbolTableEntry*)malloc(sizeof(SymbolTableEntry));
+	char ** first_quote;
+	char ** last_quote;
+	char ** line_ptr;
+	int tmp_dc = *dc;
+	int data_size;
+	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 
+	int operand_count = 0;
+	data_size = (strcmp(directive, DB_DIRECTIVE) == 0) ? DB_SIZE : (strcmp(directive, DW_DIRECTIVE) == 0) ? DW_SIZE : DH_SIZE;
+
+
+	if (has_label) {
+		if (findSymbol(SymbolTable symbol_table, label_name) == NULL){
+			data_entry.symbol = (char *)malloc(strlen(label_name) + 1);
+			strcpy(data_entry.symbol, label_name);
+			data_entry.value = *dc;
+			data_entry.attributes = DATA;
+			if(addEntryToSymbolTable(symbol_table, data_entry) == FAILURE){
+				ASM_ERROR(line_counter, (ERR_DATA_DIRECTIVE_SYMBOL_ADDITION_FAILED));
+				return FAILURE;
+			}
+
+		}
 	}
+
+	if (strcmp(directive, ASCIZ_DIRECTIVE) == 0) {
+		first_quote = strchr(line, STRING_WRAPPER);
+		if(first_quote == NULL){
+			ASM_ERROR(line_counter, (ERR_MISSING_QUOTES));
+		}
+		line_ptr = first_quote;
+		while(*line_ptr != '\0' && *line_ptr != STRING_WRAPPER){
+			(*line_ptr)++;
+		}
+		last_quote = strrchr(line, STRING_WRAPPER);
+		if(last_quote == first_quote){
+			ASM_ERROR(line_counter, (ERR_MISSING_CLOSING_QUOTES));
+		}
+		if (line_ptr != last_quote){
+			ASM_ERROR(line_counter, (ERR_TOO_MANY_QUOTES_IN_STRING));
+		}
+		line_ptr = first_quote;
+		while(*line_ptr != '\0' && *line_ptr != STRING_WRAPPER){
+			data_image[tmp_dc] = *line_ptr;
+			(*line_ptr)++;
+			tmp_dc++;
+		}
+		data_image[tmp_dc] = '\0';
+		*dc += tmp_dc - *dc;
+	}
+	else{
+		if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE){
+			return FAILURE;
+		}
+		if (operand_count == 0) {
+			ASM_ERROR(line_counter, (ERR_MISSING_OPERANDS_DATA_DIRECTIVE));
+			return FAILURE;
+		}
+	}
+	return SUCCESS;
 }
 
 Status handleExternDirective(){

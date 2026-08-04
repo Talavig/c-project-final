@@ -46,7 +46,7 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 	while (**line != '\0'){
 		if (**line == ','){
 			if (expect_comma){
-				(*ptr)++;
+				(*line)++;
 				expect_comma = FALSE;
 			}
 			else{
@@ -72,8 +72,8 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 
 		}
 
-		while (**ptr != '\0' && isspace((unsigned char)**ptr)){
-			(*ptr)++;
+		while (**line != '\0' && isspace((unsigned char)**line)){
+			(*line)++;
 		}
 
 	}

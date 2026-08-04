@@ -38,4 +38,22 @@
 #define ERR_SYMBOL_TABLE_MEMORY_ALLOCATION_FAILED "Error: Memory allocation failed for symbol table node.\n"
 #define ERR_SYMBOL_TABLE_STRING_MEMORY_ALLOCATION_FAILED "Error: Memory allocation failed for symbol string.\n"
 
+#define ERR_DATA_DIRECTIVE_SYMBOL_ADDITION_FAILED "Error: Addition of data directive to symbol table has failed.\n"
+#define ERR_TOO_MANY_QUOTES_IN_STRING "Error: .asciz string has too many quotes."
+#define ERR_MISSING_QUOTES "Error: Missing quotes in .asciz definition."
+#define ERR_MISSING_CLOSING_QUOTES "Error: Not found missing quote for .asciz."
+
+#define ERR_MISSING_OPERANDS_DATA_DIRECTIVE "Error: Missing operands for data directive."
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
