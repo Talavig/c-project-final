@@ -12,35 +12,35 @@
 Status preprocessScript(char * file_base_name){
 	FILE * input_file;
 	FILE * output_file;
-	char* input_file_name;
-	char* output_file_name;
-	Boolean is_macro;
-	char current_line[MAX_SINGLE_LINE_LENGTH] = {0};
-	char first_word[MAX_LABEL_LENGTH + 1] = {0};
-	char macro_name[MAX_LABEL_LENGTH + 1] = {0};
+	char* input_file_name = NULL;
+	char* output_file_name = NULL;
+
+	char current_line[MAX_SINGLE_LINE_LENGTH + 2];
+	char *line_ptr;
+	char first_word[MAX_TOKEN_LENGTH];
+	char macro_name[MAX_TOKEN_LENGTH];
+	char extra_word[MAX_TOKEN_LENGTH];
+
+	Boolean is_macro = FALSE;
 	Status run_status = SUCCESS;
+	int line_counter = 0;
 
 	MacroTableEntry *macro_table = NULL;
 	MacroTableEntry *current_entry = NULL;
 	MacroTableEntry *found_macro = NULL;
 
-	input_file_name = (char *)malloc(strlen(file_base_name) + 4);
-	output_file_name = (char *)malloc(strlen(file_base_name) + 4);
+	input_file_name = createFileName(file_base_name, INPUT_ASSEMBLY_FILE);
+	output_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
 
 	if (input_file_name == NULL || output_file_name == NULL) {
-		fprintf(stderr, ERR_ALLOCATION_FAILED);
-		free(input_file_name);
-		free(output_file_name);
-		return FAILURE;
+			if (input_file_name){
+				free(input_file_name);
+			}
+			if (output_file_name){
+				free(output_file_name);
+			}
+			return FAILURE;
 	}
-
-	is_macro = FALSE;
-
-	strcpy(input_file_name, file_base_name);
-	strcat(input_file_name, INPUT_ASSEMBLY_FILE);
-
-	strcpy(output_file_name, file_base_name);
-	strcat(output_file_name, MACRO_ASSEMBLY_FILE);
 
 	if ((input_file = fopen(input_file_name, "r")) == NULL){
 		fprintf(stderr, ERR_CANNOT_OPEN_FILE, input_file_name);
@@ -61,11 +61,29 @@ Status preprocessScript(char * file_base_name){
 
 		/* increment line count, reset first word buffer */
 		line_counter++;
-		memset(first_word, 0, sizeof(first_word));
+		line_ptr = current_line;
 
 		/* check if the current line can be a valid assembly line*/
-		if (parseLine(current_line, line_counter, first_word, input_file) == FAILURE){
+		if (isLineTooLong(current_line, input_file)) {
+			ASM_ERROR(line_counter, ("Line exceeds maximum length of 80 characters."));
 			run_status = FAILURE;
+		}
+
+		else{
+			line_ptr = skipWhitespaces(line_ptr);
+			if (isEmptyOrComment(line_ptr)) {
+				if (is_macro) {
+					if (addLineToMacro(current_macro, current_line) == FAILURE) {
+						run_status = FAILURE;
+					}
+					else{
+						fputs(current_line, output_file);
+					}
+				}
+			}
+			else {
+				getNextToken(&line_ptr, first_word);
+			}
 		}
 
 		/* skip empty lines\comments */

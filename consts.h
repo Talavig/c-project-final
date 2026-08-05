@@ -69,7 +69,7 @@
 #define R_INSTRUCTIONS_ARITHMATIC_OPCODES 0
 #define R_INSTRUCTIONS_MEMORY_OPCODES 1
 #define NON_R_FUNCT_VALUE 0
-#define NUM_INSTRUCTIONS = 27
+#define NUM_INSTRUCTIONS 27
 #define MAX_IMMED_VALUE (IMMED_MASK >> 1)
 #define MIN_IMMED_VALUE (-MAX_IMMED_VALUE - 1)
 
@@ -150,6 +150,7 @@ typedef struct {
 	int oprands,
 	int funct
 } Instruction;
+
 
 Instruction instructions[] = {
 		{"add", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, ADD},
