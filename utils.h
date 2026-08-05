@@ -10,3 +10,6 @@ Status extractOperands(char **ptr, char operands[][MAX_TOKEN_LENGTH], int *opera
 
 
 Instruction * getInstruction(char* instruction_name);
+
+
+Boolean parseRegister(const char *str, int *reg_num);

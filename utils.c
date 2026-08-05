@@ -94,3 +94,57 @@ Instruction * getInstruction(char* instruction_name){
 	}
 	return NULL;
 }
+
+
+Boolean parseRegister(const char *str, int *reg_num) {
+	char *endp;
+	long parsed_val;
+
+	if (str == NULL || str[0] != REGISTER_INDICATOR) {
+		return FALSE;
+	}
+
+	parsed_val = strtol(str + 1, &endp, 10);
+
+	if (*endp != '\0') {
+		return FALSE;
+	}
+
+	if (parsed_val > 0 && parsed_val < NUM_REGISTERS) {
+		*reg_num = (int)parsed_val;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+
+Boolean parseImmediate(const char *str, int *val) {
+	char *endp;
+	long parsed_val;
+
+	if (str == NULL || *str == '\0') {
+		return FALSE;
+	}
+
+	parsed_val = strtol(str, &endp, 10);
+
+	if (*endp != '\0') {
+		return FALSE;
+	}
+
+	if (parsed_val <= MAX_IMMED_VALUE && parsed_val >= MIN_IMMED_VALUE) {
+		*val = (int)parsed_val;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+
+
+
+
+
+
+

@@ -84,7 +84,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 		return FAILURE;
 	}
 	else{
-
+		updateDataSymbolAddresses(*symbol_table, *ic);
 		return SUCCESS;
 	}
 }
@@ -285,6 +285,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	int funct = 0;
 	int reg = 0;
 	long address = 0;
+	int i;
 
 	if (has_label) {
 		if (findSymbol(SymbolTable symbol_table, label_name) == NULL){
@@ -323,18 +324,119 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 
 	machine_code |= (instruction->opcode << OPCODE_SHIFT);
 
-	if (instruction->type == R_TYPE) {
 
+	switch (instruction->type) {
+	case R_TYPE:
+		switch (instruction->opcode){
+		case R_INSTRUCTIONS_ARITHMATIC_OPCODES:
+			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseRegister(operands[2], &rd)){
+				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction));
+				return FAILURE;
+			}
+			break;
+
+		case R_INSTRUCTIONS_MEMORY_OPCODES:
+			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rd)) {
+				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction));
+				return FAILURE;
+			}
+			break;
+
+		default:
+			ASM_ERROR(line_counter, ("Invalid R-type opcode."));
+			return FAILURE;
+		}
+
+		machine_code |= (rs << RS_SHIFT);
+		machine_code |= (rt << RT_SHIFT);
+		machine_code |= (rd << RD_SHIFT);
+		machine_code |= (instruction->funct << FUNCT_SHIFT);
+		break;
+
+	case I_TYPE:
+		switch (instruction->opcode){
+		case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB:   case SB:   case LW:   case SW:  case LH:  case SH:
+			if (!parseRegister(operands[0], &rs) || !parseImmediate(operands[1], &immed) || !parseRegister(operands[2], &rt)) {
+				ASM_ERROR(line_counter, ("Invalid operands for '%s'.", instruction));
+				return FAILURE;
+			}
+			break;
+
+		case BNE: case BEQ: case BLT: case BGT:
+			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt)) {
+				ASM_ERROR(line_counter, ("First two operands for '%s' must be registers.", instruction));
+				return FAILURE;
+			}
+			if (!isValidLabel(operands[2])) {
+				ASM_ERROR(line_counter, ("Third operand for '%s' must be a valid label.", instruction));
+				return FAILURE;
+			}
+			break;
+
+		default:
+			ASM_ERROR(line_counter, ("Invalid I-type opcode."));
+			return FAILURE;
+		}
+
+		machine_code |= (rs << RS_SHIFT);
+		machine_code |= (rt << RT_SHIFT);
+		machine_code |= (immed & IMMED_MASK);
+		break;
+
+
+	case J_TYPE:
+		switch (instruction->opcode){
+		case HLT:
+			break;
+		case JMP:
+			if (operands[0][0] == REGISTER_INDICATOR) {
+				if (!parseRegister(operands[0], &rs)) {
+					ASM_ERROR(line_counter, ("Invalid register for jmp."));
+					return FAILURE;
+				}
+				address = rs;
+			}
+			else{
+				if (!isValidLabel(operands[0])) {
+					ASM_ERROR(line_counter, ("Invalid label for jmp."));
+					return FAILURE;
+				}
+			}
+			break;
+
+		case LA: case CALL:
+			if (!isValidLabel(operands[0])) {
+				ASM_ERROR(line_counter, ("Operand for '%s' must be a valid label.", instruction));
+				return FAILURE;
+			}
+			break;
+
+		default:
+			ASM_ERROR(line_counter, ("Invalid J-type opcode."));
+			return FAILURE;
+		}
+		machine_code |= (reg << REG_JUMP_SHIFT);
+		machine_code |= (address & ADDRESS_MASK);
+		break;
+
+	default:
+		ASM_ERROR(line_counter, ("Unknown instruction type."));
+		return FAILURE;
 	}
 
-	else if (inst_def->type == I_TYPE) {
-
-	}
-
-	else if (inst_def->type == J_TYPE) {
-
-	}
+	code_image[(*ic - IC_INITIAL_VALUE) / INSTRUCTION_BYTES_SIZE] = machine_code;
 
 	*ic += INSTRUCTION_BYTES_SIZE;
 	return SUCCESS;
 }
+
+void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
+	SymbolTableNode *current = symbol_table;
+	while (current != NULL) {
+		if (current->entry.attributes & ATTR_DATA) {
+			current->entry.value += icf;
+		}
+		current = current->next;
+	}
+}
+
