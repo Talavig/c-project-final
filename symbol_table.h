@@ -17,7 +17,6 @@ typedef struct SymbolTableNode{
 
 typedef SymbolTableNode* SymbolTable;
 
-SymbolTable initializeSymbolTable();
 
 Status addEntryToSymbolTable(SymbolTable symbol_table, SymbolTableEntry new_entry);
 

@@ -201,3 +201,6 @@ Instruction instructions[] = {
 #define BYTE_MASK 0xFF
 #define IMMED_MASK 0xFFFF
 #define ADDRESS_MASK 0x1FFFFFF
+
+#define CODE_IMAGE_SIZE 4096
+#define DATA_IMAGE_SIZE 4096

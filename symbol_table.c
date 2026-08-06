@@ -4,10 +4,6 @@
 #include "symbol_table.h"
 
 
-SymbolTable initializeSymbolTable() {
-    return NULL;
-}
-
 Status addEntryToSymbolTable(SymbolTable *symbol_table, SymbolTableEntry new_entry) {
 	SymbolTableNode *new_node = (SymbolTableNode*)malloc(sizeof(SymbolTableNode));
 	if (new_node == NULL) {
