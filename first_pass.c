@@ -30,7 +30,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 	int line_counter = 0;
 
 
-	macro_file_name = createFileName(file_base_name, INPUT_ASSEMBLY_FILE);
+	macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
 	if (macro_file_name == NULL) {
 		return FAILURE;
 	}
