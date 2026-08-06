@@ -110,28 +110,79 @@ Boolean isEmptyOrComment(char *current_line){
 }
 
 Boolean isLabelDef(char *token){
-
+	return (token[strlen(token) - 1] == LABEL_END) ? TRUE : FALSE;
 }
 
-Boolean isDataDirective(char *token){
-
+Boolean isDataDirective(char* token){
+	return (strcmp(token, DB_DIRECTIVE) == 0 || strcmp(token, DW_DIRECTIVE) == 0 || strcmp(token, DH_DIRECTIVE) == 0 || strcmp(token, ASCIZ_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
 Boolean isExternDirective(char *token){
-
+	return (strcmp(token, EXTERN_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
 Boolean isEntryDirective(char *token){
-
+	return (strcmp(token, ENTRY_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
 
 Boolean isReservedWord(char *word){
+	int fake_reg;
 
+	if (word == NULL) {
+		return FALSE;
+	}
+
+	if (getInstruction(word) != NULL) {
+		return TRUE;
+	}
+
+	if (parseRegister(word, &fake_reg) == TRUE) {
+		return TRUE;
+	}
+
+	if (isDataDirective(word)) {
+		return TRUE;
+	}
+
+	if (isExternDirective(word) || isEntryDirective(word)) {
+		return TRUE;
+	}
+
+	if (strcmp(word, MACRO_START) == 0 || strcmp(word, MACRO_END) == 0) {
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 Boolean isValidLabel(char *str){
+	const char *ptr = str;
 
+	if (str == NULL || *str == '\0') {
+		return FALSE;
+	}
+
+	if (strlen(str) > MAX_LABEL_LENGTH) {
+		return FALSE;
+	}
+
+	if (!isalpha((unsigned char)*ptr)) {
+		return FALSE;
+	}
+
+	while (*ptr != '\0') {
+		if (!isalnum((unsigned char)*ptr)) {
+			return FALSE;
+		}
+		ptr++;
+	}
+
+	if (isReservedWord((char *)str)) {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 Boolean parseRegister(const char *str, int *reg_num) {
