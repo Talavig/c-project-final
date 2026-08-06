@@ -39,6 +39,8 @@ void freeSymbolTable(SymbolTable* symbol_table){
 		free(current);
 		current = next_node;
 	}
+
+	*extern_table = NULL;
 }
 
 SymbolTableNode* findSymbol(SymbolTable symbol_table, char *name){

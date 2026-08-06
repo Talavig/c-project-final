@@ -7,7 +7,7 @@
 #include "symbol_table.h"
 
 
-Status secondPass(char *file_name, SymbolTable *symbol_table, unsigned int[]* code_image, /* ExternList *ext_list */) {
+Status secondPass(char *file_name, SymbolTable *symbol_table, unsigned long * code_image, /* ExternList *ext_list */) {
 	char * current_line[MAX_SINGLE_LINE_LENGTH + 2];
 	int line_counter = 0;
 	Status pass_status = SUCCESS;
@@ -32,15 +32,4 @@ Status secondPass(char *file_name, SymbolTable *symbol_table, unsigned int[]* co
 
 	return SUCCESS;
 
-
-
-
-
-
-
-
-
-
-
-	return SUCCESS;
 }

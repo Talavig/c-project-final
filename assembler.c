@@ -11,8 +11,8 @@ int main(int argc, char *argv[]){
 		printf()
 	}
 
-	int ic = IC_INITIAL_VALUE;
-	int dc = DC_INITIAL_VALUE;
+	int ic;
+	int dc;
 	SymbolTable symbol_table;
 	int i;
 
