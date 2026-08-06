@@ -125,6 +125,10 @@ Boolean isEntryDirective(char *token){
 	return (strcmp(token, ENTRY_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
+Boolean isInstruction(char *token) {
+	return (getInstruction(token) != NULL) ? TRUE : FALSE;
+}
+
 
 Boolean isReservedWord(char *word){
 	int fake_reg;

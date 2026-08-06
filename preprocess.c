@@ -16,7 +16,7 @@ Status preprocessScript(char * file_base_name){
 	char* output_file_name = NULL;
 
 	char current_line[MAX_SINGLE_LINE_LENGTH + 2];
-	char *line_ptr;
+	char *current_line_ptr;
 	char first_word[MAX_TOKEN_LENGTH];
 	char macro_name[MAX_TOKEN_LENGTH];
 	char extra_word[MAX_TOKEN_LENGTH];
@@ -61,7 +61,7 @@ Status preprocessScript(char * file_base_name){
 
 		/* increment line count, reset first word buffer */
 		line_counter++;
-		line_ptr = current_line;
+		current_line_ptr = current_line;
 
 		/* check if the current line can be a valid assembly line*/
 		if (isLineTooLong(current_line, input_file)) {
@@ -70,8 +70,8 @@ Status preprocessScript(char * file_base_name){
 		}
 
 		else{
-			line_ptr = skipWhitespaces(line_ptr);
-			if (isEmptyOrComment(line_ptr)) {
+			current_line_ptr = skipWhitespaces(current_line_ptr);
+			if (isEmptyOrComment(current_line_ptr)) {
 				if (is_macro) {
 					if (addLineToMacro(current_macro, current_line) == FAILURE) {
 						run_status = FAILURE;
@@ -82,10 +82,10 @@ Status preprocessScript(char * file_base_name){
 				}
 			}
 			else {
-				getNextToken(&line_ptr, first_word);
+				getNextToken(&current_line_ptr, first_word);
 
 				if (is_macro && strcmp(first_word, MACRO_END) == 0) {
-					if (getNextToken(&line_ptr, extra_word) == TRUE) {
+					if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
 						ASM_ERROR(line_counter, ("Extraneous text after macro end directive."));
 						run_status = FAILURE;
 					}
@@ -102,11 +102,11 @@ Status preprocessScript(char * file_base_name){
 				}
 
 				else if (strcmp(first_word, MACRO_START) == 0){
-					if (getNextToken(&line_ptr, macro_name) == FALSE) {
+					if (getNextToken(&current_line_ptr, macro_name) == FALSE) {
 						ASM_ERROR(line_counter, ("Missing macro name after macro start directive."));
 						run_status = FAILURE;
 					}
-					else if (getNextToken(&line_ptr, extra_word) == TRUE) {
+					else if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
 						ASM_ERROR(line_counter, ("Extraneous text after macro name."));
 						run_status = FAILURE;
 					}
