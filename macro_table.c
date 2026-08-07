@@ -43,6 +43,8 @@ Status addMacroToTable(MacroTableEntry** start, const char* name){
 }
 
 Status addLineToMacro(MacroTableEntry* macro, const char* line){
+	char *temp_content;
+
 	if (macro == NULL || line == NULL) {
 		return FAILURE;
 	}
@@ -56,11 +58,12 @@ Status addLineToMacro(MacroTableEntry* macro, const char* line){
 		strcpy(macro->content, line);
 	}
 	else{
-		macro->content = (char*)realloc(macro->content, strlen(macro->content) + strlen(line) + 1);
-		if (macro->content == NULL){
+		temp_content = (char*)realloc(macro->content, strlen(macro->content) + strlen(line) + 1);
+		if (temp_content == NULL){
 			fprintf(stderr, ERR_MACRO_CONTENT_REALLOC_FAILED);
 			return FAILURE;
 		}
+		macro->content = temp_content;
 		strcat(macro->content, line);
 	}
 	return SUCCESS;
@@ -86,7 +89,7 @@ void freeMacroTable(MacroTableEntry* start){
 Boolean checkMacroName(const char *name){
 	int i;
 	for (i = 0; i < NUM_INSTRUCTIONS; i++){
-		if (strcmp(instructions[i]->name, name) == 0){
+		if (strcmp(instructions[i].name, name) == 0){
 			return TRUE;
 		}
 	}
@@ -94,17 +97,17 @@ Boolean checkMacroName(const char *name){
 }
 
 Boolean checkMacroLine(const char *line){
-	char parta[MAX_SINGLE_LINE_LENGTH + 2] = {0};
-	char partb[MAX_SINGLE_LINE_LENGTH + 2] = {0};
-	char partc[MAX_SINGLE_LINE_LENGTH + 2] = {0};
+	char word_a[MAX_SINGLE_LINE_LENGTH + 2] = {0};
+	char word_b[MAX_SINGLE_LINE_LENGTH + 2] = {0};
+	char word_c[MAX_SINGLE_LINE_LENGTH + 2] = {0};
 
-	int parsed_words = sscanf(line, "%s %s %s", parta, partb, partc);
+	int parsed_words = sscanf(line, "%s %s %s", word_a, word_b, word_c);
 
-	if (strcmp(word1, MACRO_END) == 0){
+	if (strcmp(word_a, MACRO_END) == 0){
 		return (parsed_words == 1) ? TRUE : FALSE;
 	}
 
-	if (strcmp(word1, MACRO_START) == 0){
+	if (strcmp(word_a, MACRO_START) == 0){
 		return (parsed_words == 2) ? TRUE : FALSE;
 	}
 	return TRUE;

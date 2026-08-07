@@ -210,7 +210,7 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 		ASM_WARNING(line_counter, (WARN_LABEL_BEFORE_DIRECTIVE, label_name, directive));
 	}
 
-	if (extractOperands(ptr, operands, &operand_count, line_counter) == FAILURE) {
+	if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -292,12 +292,12 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		return FAILURE;
 	}
 
-	if (operand_count < instruction->expected_operands) {
+	if (operand_count < instruction->oprands) {
 		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_LOW, instruction, inst_def->expected_operands, operand_count));
 		return FAILURE;
 	}
 
-	else if (operand_count > instruction->expected_operands) {
+	else if (operand_count > instruction->oprands) {
 		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_HIGH, instruction, inst_def->expected_operands, operand_count));
 		return FAILURE;
 	}
@@ -417,7 +417,7 @@ void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
 		if (current->symbol_table_entry.attributes & DATA) {
 			current->symbol_table_entry.value += icf;
 		}
-		current = current->next;
+		current = current->next_entry;
 	}
 }
 

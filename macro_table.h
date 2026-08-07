@@ -6,7 +6,7 @@
 typedef struct MacroTableEntry{
 	char* name;
 	char *content;
-	struct * MacroTableEntry next;
+	struct MacroTableEntry *next;
 }MacroTableEntry;
 
 MacroTableEntry* findMacro(MacroTableEntry* start, const char* name);
