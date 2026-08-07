@@ -8,6 +8,7 @@
 #include "symbol_table.h"
 #include "extern_table.h"
 #include "messages.h"
+#include "second_pass.h"
 
 Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_counter);
 Status encodeCodeTraversalInstructions(char **line, char *instruction_name, SymbolTable *symbol_table, int ic, unsigned long *code_image, ExternTable *extern_table, int line_counter);
@@ -16,7 +17,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 	FILE *macro_file;
 	char *macro_file_name;
 
-	char * current_line[MAX_SINGLE_LINE_LENGTH + 2];
+	char current_line[MAX_SINGLE_LINE_LENGTH + 2];
 	char *current_line_ptr;
 	char token[MAX_TOKEN_LENGTH];
 
@@ -59,7 +60,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 								pass_status = FAILURE;
 							}
 						}
-						else if (isInstruction(token)) {
+						else if (isInstruction(token) == FALSE) {
 							if (encodeCodeTraversalInstructions(&current_line_ptr, token, symbol_table, second_pass_ic, code_image, extern_table, line_counter) == FAILURE) {
 								pass_status = FAILURE;
 							}

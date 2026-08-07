@@ -11,15 +11,15 @@
 
 Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter);
 Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter);
-Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* *code_image, int line_counter);
-void updateDataSymbolAddresses(SymbolTable *symbol_table, int icf);
+Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter);
+void updateDataSymbolAddresses(SymbolTable symbol_table, int icf);
 
 
 Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image){
 	FILE *macro_file;
 	char* macro_file_name;
 
-	char * current_line[MAX_SINGLE_LINE_LENGTH + 2];
+	char current_line[MAX_SINGLE_LINE_LENGTH + 2];
 	char *current_line_ptr;
 	char token[MAX_TOKEN_LENGTH];
 	int token_len;
@@ -113,7 +113,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 }
 
 Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter){
-	SymbolTableEntry data_entry;
+	SymbolTableEntry data_entry = {0};
 	char * first_quote;
 	char * last_quote;
 	char * line_ptr;
@@ -134,12 +134,11 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 
 	if (has_label) {
 		if (findSymbol(*symbol_table, label_name) == NULL){
-			data_entry.symbol = label_name;
+			strcpy(data_entry.symbol, label_name);
 			data_entry.value = *dc;
 			data_entry.attributes = DATA;
 			if(addEntryToSymbolTable(symbol_table, data_entry) == FAILURE){
 				ASM_ERROR(line_counter, (ERR_DATA_DIRECTIVE_SYMBOL_ADDITION_FAILED));
-				free(data_entry);
 				return FAILURE;
 			}
 		}
@@ -150,20 +149,16 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 	}
 
 	if (strcmp(directive, ASCIZ_DIRECTIVE) == 0) {
-		first_quote = strchr(line, STRING_WRAPPER);
+		first_quote = strchr(*line, STRING_WRAPPER);
 		if(first_quote == NULL){
 			ASM_ERROR(line_counter, (ERR_MISSING_QUOTES));
 			return FAILURE;
 		}
-		line_ptr = first_quote;
-		while(*line_ptr != '\0' && *line_ptr != STRING_WRAPPER){
-			(*line_ptr)++;
-		}
-		last_quote = strrchr(line, STRING_WRAPPER);
+		last_quote = strrchr(*line, STRING_WRAPPER);
 		if(last_quote == first_quote){
 			ASM_ERROR(line_counter, (ERR_MISSING_CLOSING_QUOTES));
 		}
-		if (line_ptr != last_quote){
+		if (strchr(first_quote + 1, STRING_WRAPPER) != last_quote) {
 			ASM_ERROR(line_counter, (ERR_TOO_MANY_QUOTES_IN_STRING));
 		}
 		line_ptr = first_quote + 1;
@@ -254,7 +249,7 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 	return FAILURE;
 }
 
-Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* *code_image, int line_counter){
+Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter){
 	SymbolTableEntry code_entry;
 	Instruction * instruction;
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
@@ -262,13 +257,10 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	unsigned long machine_code = 0;
 	int rs = 0, rt = 0, rd = 0;
 	int immed = 0;
-	int funct = 0;
 	int reg = 0;
 	long address = 0;
-	int i;
-
 	if (has_label) {
-		if (findSymbol(symbol_table, label_name) == NULL){
+		if (findSymbol(*symbol_table, label_name) == NULL){
 			code_entry.symbol = label_name;
 			code_entry.value = *ic;
 			code_entry.attributes = CODE;
@@ -284,7 +276,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	}
 	instruction = getInstruction(instruction_name);
 	if (instruction == NULL) {
-		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, instruction));
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, instruction->name));
 		return FAILURE;
 	}
 
@@ -293,12 +285,12 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	}
 
 	if (operand_count < instruction->oprands) {
-		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_LOW, instruction, inst_def->expected_operands, operand_count));
+		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_LOW, instruction->name, instruction->oprands, operand_count));
 		return FAILURE;
 	}
 
 	else if (operand_count > instruction->oprands) {
-		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_HIGH, instruction, inst_def->expected_operands, operand_count));
+		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_HIGH, instruction->name, instruction->oprands, operand_count));
 		return FAILURE;
 	}
 
@@ -310,14 +302,14 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		switch (instruction->opcode){
 		case R_INSTRUCTIONS_ARITHMATIC_OPCODES:
 			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseRegister(operands[2], &rd)){
-				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction));
+				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction->name));
 				return FAILURE;
 			}
 			break;
 
 		case R_INSTRUCTIONS_MEMORY_OPCODES:
 			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rd)) {
-				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction));
+				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction->name));
 				return FAILURE;
 			}
 			break;
@@ -337,18 +329,18 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			switch (instruction->opcode){
 			case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB:   case SB:   case LW:   case SW:  case LH:  case SH:
 				if (!parseRegister(operands[0], &rs) || !parseImmediate(operands[1], &immed) || !parseRegister(operands[2], &rt)) {
-					ASM_ERROR(line_counter, ("Invalid operands for '%s'.", instruction));
+					ASM_ERROR(line_counter, ("Invalid operands for '%s'.", instruction->name));
 					return FAILURE;
 				}
 				break;
 
 			case BNE: case BEQ: case BLT: case BGT:
 				if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt)) {
-					ASM_ERROR(line_counter, ("First two operands for '%s' must be registers.", instruction));
+					ASM_ERROR(line_counter, ("First two operands for '%s' must be registers.", instruction->name));
 					return FAILURE;
 				}
 				if (!isValidLabel(operands[2])) {
-					ASM_ERROR(line_counter, ("Third operand for '%s' must be a valid label.", instruction));
+					ASM_ERROR(line_counter, ("Third operand for '%s' must be a valid label.", instruction->name));
 					return FAILURE;
 				}
 				break;
@@ -386,7 +378,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 
 				case LA: case CALL:
 					if (!isValidLabel(operands[0])) {
-						ASM_ERROR(line_counter, ("Operand for '%s' must be a valid label.", instruction));
+						ASM_ERROR(line_counter, ("Operand for '%s' must be a valid label.", instruction->name));
 						return FAILURE;
 					}
 					break;

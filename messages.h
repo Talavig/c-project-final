@@ -51,7 +51,7 @@
 #define ERR_MISSING_CLOSING_QUOTES "Not found missing quote for .asciz."
 
 #define ERR_MISSING_OPERANDS_DATA_DIRECTIVE "Missing operands for data directive."
-#define ERR_DATA_NOT_FIT_FOR_TYPE "Data item %l not fitting for %s data type."
+#define ERR_DATA_NOT_FIT_FOR_TYPE "Data item %ld not fitting for %s data type."
 
 #define WARN_LABEL_BEFORE_DIRECTIVE "Label '%s' before '%s' directive is ignored.\n"
 #define ERR_MISSING_OPRAND_E_DIRECTIVE "Missing operand for %s directive."

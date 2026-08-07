@@ -91,12 +91,12 @@ Status preprocessScript(char * file_base_name){
 					}
 					else{
 						is_macro = FALSE;
-						current_macro = NULL;
+						current_entry = NULL;
 					}
 				}
 
 				else if(is_macro){
-					if (addLineToMacro(current_macro, current_line) == FAILURE) {
+					if (addLineToMacro(current_entry, current_line) == FAILURE) {
 						run_status = FAILURE;
 					}
 				}
@@ -120,7 +120,7 @@ Status preprocessScript(char * file_base_name){
 							run_status = FAILURE;
 						}
 						else{
-							current_macro = findMacro(macro_table, macro_name);
+							current_entry = findMacro(macro_table, macro_name);
 						}
 					}
 				}

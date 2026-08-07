@@ -24,5 +24,6 @@ Boolean parseImmediate(const char *str, int *val);
 
 
 Instruction *getInstruction(char *instruction_name);
+Boolean isInstruction(char *name);
 
 #endif
