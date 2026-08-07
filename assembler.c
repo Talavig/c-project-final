@@ -68,15 +68,12 @@ int main(int argc, char *argv[]){
 				else{
 					printf(INFO_ASSEMBLING, argv[i]);
 					if(preprocessScript(file_base_name) == FAILURE){
-						printf("preprocess\n");
 						printf(PREPROCESSING_ERRORS_FOUND, argv[i]);
 					}
 					else if (firstPass(file_base_name, &symbol_table, &ic, &dc, data_image, code_image) == FAILURE){
-						printf("first pass\n");
 						printf(FIRST_PASS_ERRORS_FOUND, argv[i]);
 					}
 					else if (secondPass(file_base_name, &symbol_table, code_image, &extern_table) == FAILURE) {
-						printf("second pass\n");
 						printf(SECOND_PASS_ERRORS_FOUND, argv[i]);
 					}
 					else{
@@ -98,6 +95,7 @@ int main(int argc, char *argv[]){
 		}
 
 	}
+	printf(INFO_FINISHED_ASSEMBLING);
 	return EXIT_SUCCESS;
 }
 
@@ -128,7 +126,6 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 	int instruction_count;
 	int data_count;
 	int i, j;
-	unsigned long data_word;
 	int bytes_to_copy;
 
 	instruction_count = (ic - IC_INITIAL_VALUE) / INSTRUCTION_BYTES_SIZE;

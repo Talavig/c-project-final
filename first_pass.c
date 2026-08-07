@@ -69,6 +69,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 						if (!isValidLabel(token)) {
 							ASM_ERROR(line_counter, (ERR_INVALID_LABEL_NAME, token));
 							pass_status = FAILURE;
+							getNextToken(&current_line_ptr, token);
 						}
 						else{
 							strcpy(label_name, token);
