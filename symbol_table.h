@@ -4,7 +4,7 @@
 #include "consts.h"
 
 typedef struct SymbolTableEntry{
-	char* symbol;
+	char symbol[MAX_LABEL_LENGTH];
 	int value;
 	Attribute attributes;
 }SymbolTableEntry;

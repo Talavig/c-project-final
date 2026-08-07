@@ -79,7 +79,6 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 						}
 					}
 					if (token[0] != '\0'){
-						printf("%s",token);
 						if(isDataDirective(token) && handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_counter) == FAILURE){
 							pass_status = FAILURE;
 						}
@@ -88,7 +87,6 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 								pass_status = FAILURE;
 							}
 						}
-						/* entry directives are handled in the second pass */
 						else if(isInstruction(token) && handleInstruction(&current_line_ptr, token, has_label, label_name, symbol_table, ic, code_image, line_counter) == FAILURE){
 							pass_status = FAILURE;
 						}
@@ -262,9 +260,10 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	int immed = 0;
 	int reg = 0;
 	long address = 0;
+	printf("DEBUG handleInstruction: processing %s, operand_count=%d\n", instruction_name, operand_count);
 	if (has_label) {
 		if (findSymbol(*symbol_table, label_name) == NULL){
-			code_entry.symbol = label_name;
+			strcpy(code_entry.symbol,label_name);
 			code_entry.value = *ic;
 			code_entry.attributes = CODE;
 			if(addEntryToSymbolTable(symbol_table, code_entry) == FAILURE){
@@ -279,12 +278,15 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	}
 	instruction = getInstruction(instruction_name);
 	if (instruction == NULL) {
-		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_NAME, instruction->name));
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_NAME, instruction_name));
 		return FAILURE;
 	}
 
 	if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE) {
 		return FAILURE;
+	}
+	else{
+		printf("SUCCESS! Extracted %d operands: [%s], [%s], [%s]\n",operand_count, operands[0], operands[1], operands[2]);
 	}
 
 	if (operand_count < instruction->oprands) {
@@ -299,19 +301,20 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 
 	machine_code |= (instruction->opcode << OPCODE_SHIFT);
 
+	printf("DEBUG handleInstruction validating instruction: %s (type: %d) with %d operands\n",instruction->name, instruction->type, operand_count);
 
 	switch (instruction->type) {
 	case R_TYPE:
 		switch (instruction->opcode){
 		case R_INSTRUCTIONS_ARITHMATIC_OPCODES:
-			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseRegister(operands[2], &rd)){
+			if (!parseRegister(operands[0], &rd) || !parseRegister(operands[1], &rs) || !parseRegister(operands[2], &rt)){
 				ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_REGISTER, instruction->name));
 				return FAILURE;
 			}
 			break;
 
 		case R_INSTRUCTIONS_MEMORY_OPCODES:
-			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rd)) {
+			if (!parseRegister(operands[0], &rd) || !parseRegister(operands[1], &rs)) {
 				ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_REGISTER, instruction->name));
 				return FAILURE;
 			}
@@ -322,6 +325,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			return FAILURE;
 		}
 
+		machine_code |= (instruction->opcode << OPCODE_SHIFT);
 		machine_code |= (rs << RS_SHIFT);
 		machine_code |= (rt << RT_SHIFT);
 		machine_code |= (rd << RD_SHIFT);
@@ -331,7 +335,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		case I_TYPE:
 			switch (instruction->opcode){
 			case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB:   case SB:   case LW:   case SW:  case LH:  case SH:
-				if (!parseRegister(operands[0], &rs) || !parseImmediate(operands[1], &immed) || !parseRegister(operands[2], &rt)) {
+				if (!parseRegister(operands[0], &rt) || !parseRegister(operands[1], &rs) || !parseImmediate(operands[2], &immed)) {
 					ASM_ERROR(line_counter, (ERR_INVALID_OPRANDS, instruction->name));
 					return FAILURE;
 				}
@@ -359,44 +363,44 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			break;
 
 
-			case J_TYPE:
-				switch (instruction->opcode){
-				case HLT:
-					break;
-				case JMP:
-					if (operands[0][0] == REGISTER_INDICATOR) {
-						if (!parseRegister(operands[0], &rs)) {
-							ASM_ERROR(line_counter, (ERR_INVALID_REGISTER_JMP));
-							return FAILURE;
-						}
-						address = rs;
-					}
-					else{
-						if (!isValidLabel(operands[0])) {
-							ASM_ERROR(line_counter, (ERR_INVALID_LABEL_JMP));
-							return FAILURE;
-						}
-					}
-					break;
-
-				case LA: case CALL:
-					if (!isValidLabel(operands[0])) {
-						ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_LABEL, instruction->name));
+		case J_TYPE:
+			switch (instruction->opcode){
+			case HLT:
+				break;
+			case JMP:
+				if (operands[0][0] == REGISTER_INDICATOR) {
+					if (!parseRegister(operands[0], &rs)) {
+						ASM_ERROR(line_counter, (ERR_INVALID_REGISTER_JMP));
 						return FAILURE;
 					}
-					break;
-
-				default:
-					ASM_ERROR(line_counter, (INVALID_J_OPCODE));
-					return FAILURE;
+					address = rs;
 				}
-				machine_code |= (reg << REG_JUMP_SHIFT);
-				machine_code |= (address & ADDRESS_MASK);
+				else{
+					if (!isValidLabel(operands[0])) {
+						ASM_ERROR(line_counter, (ERR_INVALID_LABEL_JMP));
+						return FAILURE;
+					}
+				}
 				break;
 
-				default:
-					ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_TYPE));
+			case LA: case CALL:
+				if (!isValidLabel(operands[0])) {
+					ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_LABEL, instruction->name));
 					return FAILURE;
+				}
+				break;
+
+			default:
+				ASM_ERROR(line_counter, (INVALID_J_OPCODE));
+				return FAILURE;
+			}
+			machine_code |= (reg << REG_JUMP_SHIFT);
+			machine_code |= (address & ADDRESS_MASK);
+			break;
+
+			default:
+				ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_TYPE));
+				return FAILURE;
 	}
 
 	code_image[(*ic - IC_INITIAL_VALUE) / INSTRUCTION_BYTES_SIZE] = machine_code;

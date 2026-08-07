@@ -108,29 +108,37 @@ char *skipWhitespaces(char *str) {
 }
 
 
-Boolean getNextToken(char **src, char *dest) {
+Boolean getNextToken(char **line, char *token) {
 	int i = 0;
+	char *ptr = *line;
 
-	*src = skipWhitespaces(*src);
-	if (**src == '\0') {
-		dest[0] = '\0';
+	while (*ptr != '\0' && isspace((unsigned char)*ptr)) {
+		ptr++;
+	}
+
+	if (*ptr == '\0' || *ptr == '\n' || *ptr == '\r') {
+		token[0] = '\0';
 		return FALSE;
 	}
 
-	while (**src != '\0' && !isspace((unsigned char)**src) && **src != ','){
-		dest[i] = **src;
-		(*src)++;
-		i++;
+	while (*ptr != '\0' && !isspace((unsigned char)*ptr) && *ptr != ',' && *ptr != '\r' && *ptr != '\n') {
+		if (i < MAX_TOKEN_LENGTH - 1) {
+			token[i++] = *ptr;
+		}
+		ptr++;
 	}
 
-	dest[i] = '\0';
+	token[i] = '\0';
+	*line = ptr;
 	return TRUE;
 }
 
 
 Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *operand_count, int line_counter){
+	printf("DEBUG extractOperands sees line starting with: '%s'\n", *line);
 	Boolean expect_comma = FALSE;
 	*operand_count = 0;
+	memset(operands, 0, MAX_OPERANDS_PER_LINE * MAX_TOKEN_LENGTH * sizeof(char));
 	while (**line != '\0' && isspace((unsigned char)**line)) {
 		(*line)++;
 	}
@@ -206,6 +214,7 @@ Boolean isLabelDef(char *token){
 }
 
 Boolean isDataDirective(char* token){
+	printf("DEBUG isDataDirective checking token: '%s' (length: %lu)\n", token, strlen(token));
 	return (strcmp(token, DB_DIRECTIVE) == 0 || strcmp(token, DW_DIRECTIVE) == 0 || strcmp(token, DH_DIRECTIVE) == 0 || strcmp(token, ASCIZ_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
