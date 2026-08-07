@@ -1,5 +1,5 @@
-#ifndef CONSTS
-#define CONSTS
+#ifndef CONSTS_H
+#define CONSTS_H
 
 /*
  * machine related consts
@@ -72,7 +72,6 @@
 #define R_INSTRUCTIONS_ARITHMATIC_OPCODES 0
 #define R_INSTRUCTIONS_MEMORY_OPCODES 1
 #define NON_R_FUNCT_VALUE 0
-#define NUM_INSTRUCTIONS 27
 #define MAX_IMMED_VALUE (IMMED_MASK >> 1)
 #define MIN_IMMED_VALUE (-MAX_IMMED_VALUE - 1)
 
@@ -147,48 +146,15 @@ typedef enum {
 } InstructionType;
 
 typedef struct {
-	char *name,
-	InstructionType type,
-	int opcode,
-	int oprands,
-	int funct
+	char *name;
+	InstructionType type;
+	int opcode;
+	int oprands;
+	int funct;
 } Instruction;
 
-
-Instruction instructions[] = {
-		{"add", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, ADD},
-		{"sub", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, SUB},
-		{"and", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, AND},
-		{"or", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, OR},
-		{"nor", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, NOR},
-
-		{"move", R_TYPE, R_INSTRUCTIONS_MEMORY_OPCODES, 2, MOVE},
-		{"mvhi", R_TYPE, R_INSTRUCTIONS_MEMORY_OPCODES, 2, MVHI},
-		{"mvlo", R_TYPE, R_INSTRUCTIONS_MEMORY_OPCODES, 2, MVLO},
-
-		{"addi", I_TYPE, ADDI, 3, NON_R_FUNCT_VALUE},
-		{"subi", I_TYPE, SUBI, 3, NON_R_FUNCT_VALUE},
-		{"andi", I_TYPE, ANDI, 3, NON_R_FUNCT_VALUE},
-		{"ori", I_TYPE, ORI, 3, NON_R_FUNCT_VALUE},
-		{"nori", I_TYPE, NORI, 3, NON_R_FUNCT_VALUE},
-
-		{"bne", I_TYPE, BNE, 3, NON_R_FUNCT_VALUE},
-		{"beq", I_TYPE, BEQ, 3, NON_R_FUNCT_VALUE},
-		{"blt", I_TYPE, BLT, 3, NON_R_FUNCT_VALUE},
-		{"bgt", I_TYPE, BGT, 3, NON_R_FUNCT_VALUE},
-
-		{"lb", I_TYPE, LB, 3, NON_R_FUNCT_VALUE},
-		{"sb", I_TYPE, SB, 3, NON_R_FUNCT_VALUE},
-		{"lw", I_TYPE, LW, 3, NON_R_FUNCT_VALUE},
-		{"sw", I_TYPE, SW, 3, NON_R_FUNCT_VALUE},
-		{"lh", I_TYPE, LH, 3, NON_R_FUNCT_VALUE},
-		{"sh", I_TYPE, SH, 3, NON_R_FUNCT_VALUE},
-
-		{"jmp", J_TYPE, JMP, 1, NON_R_FUNCT_VALUE},
-		{"la", J_TYPE, LA, 1, NON_R_FUNCT_VALUE},
-		{"call", J_TYPE, CALL, 1, NON_R_FUNCT_VALUE},
-		{"hlt", J_TYPE, HLT, 1, NON_R_FUNCT_VALUE}
-};
+extern Instruction instructions[];
+extern const int NUM_INSTRUCTIONS_CONST;
 
 /*
  * bitshift consts

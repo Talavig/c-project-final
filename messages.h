@@ -53,14 +53,13 @@
 #define ERR_MISSING_OPERANDS_DATA_DIRECTIVE "Missing operands for data directive."
 #define ERR_DATA_NOT_FIT_FOR_TYPE "Data item %l not fitting for %s data type."
 
-#define WARN_LABEL_BEFORE_DIRECTIVE "Label '%s' before '%s' directive is ignored.\n
+#define WARN_LABEL_BEFORE_DIRECTIVE "Label '%s' before '%s' directive is ignored.\n"
 #define ERR_MISSING_OPRAND_E_DIRECTIVE "Missing operand for %s directive."
 #define ERR_TOO_MANY_OPRANDS_E_DIRECTIVE "Too many operands for %s directive."
 
 #define ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE "Symbol %s declared extern was already defined in this file as code."
 #define ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA "Symbol %s declared extern was already defined in this file as data."
 
-#define ERR_UNKNOWN_INSTRUCTION "Unknown instruction '%s'."
 #define ERR_INSTRUCTION_OPRAND_COUNT_LOW "Instruction '%s' got too little arguments expects %d operands, got %d."
 #define ERR_INSTRUCTION_OPRAND_COUNT_HIGH "Instruction '%s' got too many arguments expects %d operands, got %d."
 

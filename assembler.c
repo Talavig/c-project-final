@@ -7,6 +7,9 @@
 #include "utils.h"
 #include "symbol_table.h"
 #include "extern_table.h"
+#include "preprocess.h"
+#include "first_pass.h"
+#include "second_pass.h"
 
 Status generate_output_files(char *file_base_name, SymbolTable *symbol_table, ExternTable *extern_table, int ic, int dc, unsigned char *data_image, unsigned long *code_image);
 
@@ -38,8 +41,8 @@ int main(int argc, char *argv[]){
 		dc = DC_INITIAL_VALUE;
 		code_image = (unsigned long *)calloc(MAX_MEMORY_SIZE / 4, sizeof(unsigned long));;
 		data_image = (unsigned char *)calloc(MAX_MEMORY_SIZE, sizeof(unsigned char));
-		SymbolTable symbol_table = NULL;
-		ExternTable extern_table = NULL;
+		symbol_table = NULL;
+		extern_table = NULL;
 
 		if (code_image == NULL || data_image == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed for file %s.\n", file_base_name);
@@ -60,7 +63,7 @@ int main(int argc, char *argv[]){
 				printf("Errors found during the first pass of %s. Skipping to next file.\n", file_base_name);
 			}
 			else if (secondPass(file_base_name, symbol_table, ic, dc) == FAILURE){
-				secondPass(file_base_name, &symbol_table, code_image, &extern_table) == FAILURE
+				printf("Errors found during the second pass of %s. Skipping to next file.\n", file_base_name);
 			}
 			else{
 				if (generate_output_files(file_base_name, &symbol_table, &extern_table, ic, dc, data_image, code_image) == SUCCESS){
@@ -108,15 +111,11 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 	int data_count;
 	int i;
 
-	SymbolTableNode *current_symbol;
-	ExternTableNode *current_extern;
-	Boolean entry_created = FALSE;
-
 	instruction_count = (ic - IC_INITIAL_VALUE) / INSTRUCTION_BYTES_SIZE;
 	data_count = dc - DC_INITIAL_VALUE;
 
 	object_file_name = createFileName(file_base_name, OUTPUT_OBJECT_FILE);
-	if (ob_name == NULL) {
+	if (object_file_name == NULL) {
 		return FAILURE;
 	}
 
@@ -137,7 +136,7 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 
 	current_address = ic;
 	for (i = 0; i < data_count; i++) {
-		fprintf(ob_file, OUTPUT_DATA_FORMAT, current_address, (data_image[i] & PRINT_MASK_8));
+		fprintf(object_file, OUTPUT_DATA_FORMAT, current_address, (data_image[i] & PRINT_MASK_8));
 		current_address++;
 	}
 
@@ -153,24 +152,24 @@ static Status createEntriesFile(char *file_base_name, SymbolTable *symbol_table)
 	SymbolTableNode *current_symbol = *symbol_table;
 	Boolean file_created = FALSE;
 
-	while(current != NULL){
-		if (current->entry.attributes & ENTRY) {
+	while(current_symbol != NULL){
+		if (current_symbol->symbol_table_entry.attributes & ENTRY) {
 			if (!file_created) {
-				entries_file_name = createFileName(file_base_name, OUTPUT_ENTRY_FILE);
+				entries_file_name = createFileName(file_base_name, OUTPUT_ENTRIES_FILE);
 				if (entries_file_name == NULL){
 					return FAILURE;
 				}
 				entries_file = fopen(entries_file_name, "w");
-				if (ent_file == NULL) {
+				if (entries_file == NULL) {
 					fprintf(stderr, "Error: Cannot create entry file %s\n", entries_file_name);
 					free(entries_file_name);
 					return FAILURE;
 				}
 				file_created = TRUE;
 			}
-			fprintf(entries_file, OUTPUT_SYMBOL_FORMAT, current->entry.symbol, current->entry.value);
+			fprintf(entries_file, OUTPUT_SYMBOL_FORMAT, current_symbol->symbol_table_entry.symbol, current_symbol->symbol_table_entry.value);
 		}
-		current = current->next;
+		current_symbol = current_symbol->next_entry;
 	}
 
 	if (file_created) {
@@ -191,22 +190,22 @@ static Status createExternalsFile(char *file_base_name, ExternTable *extern_tabl
 		return SUCCESS;
 	}
 
-	externals_file_name = createFileName(file_base_name, OUTPUT_EXTERN_FILE);
+	externals_file_name = createFileName(file_base_name, OUTPUT_EXTERNALS_FILE);
 	if (externals_file_name == NULL) {
 		return FAILURE;
 	}
 
 	externals_file = fopen(externals_file_name, "w");
 	if (externals_file == NULL) {
-		fprintf(stderr, "Error: Cannot create externals file %s\n", object_file_name);
+		fprintf(stderr, "Error: Cannot create externals file %s\n", externals_file_name);
 		free(externals_file_name);
 		return FAILURE;
 	}
 
-	current = *extern_table;
-	while (current != NULL) {
-		fprintf(externals_file, OUTPUT_SYMBOL_FORMAT, current->extern_table_entry.symbol, current->extern_table_entry.address);
-		current = current->next_entry;
+	current_extern = *extern_table;
+	while (current_extern != NULL) {
+		fprintf(externals_file, OUTPUT_SYMBOL_FORMAT, current_extern->extern_table_entry.symbol, current_extern->extern_table_entry.address);
+		current_extern = current_extern->next_entry;
 	}
 
 	fclose(externals_file);
