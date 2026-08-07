@@ -150,18 +150,22 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 
 	current_address = IC_INITIAL_VALUE;
 	for (i = 0; i < instruction_count; i++) {
-		fprintf(object_file, OUTPUT_CODE_FORMAT, current_address, (code_image[i] & PRINT_MASK_32));
+		fprintf(object_file, "%04d", current_address);
+		for (j = 0; j < 4; j++) {
+			fprintf(object_file, " %02X", (unsigned int)((code_image[i] >> (j * 8)) & 0xFF));
+		}
+		fprintf(object_file, "\n");
 		current_address += INSTRUCTION_BYTES_SIZE;
 	}
 
 	current_address = ic;
 	for (i = 0; i < data_count; i += 4) {
-		data_word = 0;
 		bytes_to_copy = (data_count - i < 4) ? (data_count - i) : 4;
+		fprintf(object_file, "%04d", current_address);
 		for (j = 0; j < bytes_to_copy; j++) {
-			data_word |= ((unsigned long)data_image[i + j] & 0xFF) << (j * 8);
+			fprintf(object_file, " %02X", data_image[i + j]);
 		}
-		fprintf(object_file, OUTPUT_CODE_FORMAT, current_address, data_word);
+		fprintf(object_file, "\n");
 		current_address += 4;
 	}
 
