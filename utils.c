@@ -77,7 +77,6 @@ Boolean parseRegister(const char *str, int *reg_num) {
 
 
 Boolean parseImmediate(const char *str, int *val) {
-	printf(str);
 	char *endp;
 	long parsed_val;
 

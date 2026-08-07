@@ -307,14 +307,14 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	case R_TYPE:
 		switch (instruction->opcode){
 		case R_INSTRUCTIONS_ARITHMATIC_OPCODES:
-			if (!parseRegister(operands[0], &rd) || !parseRegister(operands[1], &rs) || !parseRegister(operands[2], &rt)){
+			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseRegister(operands[2], &rd)){
 				ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_REGISTER, instruction->name));
 				return FAILURE;
 			}
 			break;
 
 		case R_INSTRUCTIONS_MEMORY_OPCODES:
-			if (!parseRegister(operands[0], &rd) || !parseRegister(operands[1], &rs)) {
+			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rd)) {
 				ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_REGISTER, instruction->name));
 				return FAILURE;
 			}
@@ -334,7 +334,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		case I_TYPE:
 			switch (instruction->opcode){
 			case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB: case SB: case LW: case SW: case LH: case SH:
-				if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseImmediate(operands[2], &immed)) {
+				if (!parseRegister(operands[0], &rs) || !parseRegister(operands[2], &rt) || !parseImmediate(operands[1], &immed)) {
 					ASM_ERROR(line_counter, (ERR_INVALID_OPRANDS, instruction->name));
 					return FAILURE;
 				}
@@ -373,6 +373,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 						return FAILURE;
 					}
 					address = rs;
+					reg = 1;
 				}
 				else{
 					if (!isValidLabel(operands[0])) {

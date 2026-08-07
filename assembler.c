@@ -124,11 +124,12 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 	FILE *object_file;
 	char *object_file_name = NULL;
 
-
 	int current_address;
 	int instruction_count;
 	int data_count;
-	int i;
+	int i, j;
+	unsigned long data_word;
+	int bytes_to_copy;
 
 	instruction_count = (ic - IC_INITIAL_VALUE) / INSTRUCTION_BYTES_SIZE;
 	data_count = dc - DC_INITIAL_VALUE;
@@ -154,9 +155,14 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 	}
 
 	current_address = ic;
-	for (i = 0; i < data_count; i++) {
-		fprintf(object_file, OUTPUT_DATA_FORMAT, current_address, (data_image[i] & PRINT_MASK_8));
-		current_address++;
+	for (i = 0; i < data_count; i += 4) {
+		data_word = 0;
+		bytes_to_copy = (data_count - i < 4) ? (data_count - i) : 4;
+		for (j = 0; j < bytes_to_copy; j++) {
+			data_word |= ((unsigned long)data_image[i + j] & 0xFF) << (j * 8);
+		}
+		fprintf(object_file, OUTPUT_CODE_FORMAT, current_address, data_word);
+		current_address += 4;
 	}
 
 	fclose(object_file);
