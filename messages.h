@@ -97,4 +97,39 @@
 #define ERR_EXTERN_TABLE_MEMORY_ALLOCATION_FAILED "Memory allocation failed for extern table node.\n"
 #define ERR_EXTERN_TABLE_STRING_MEMORY_ALLOCATION_FAILED "Memory allocation failed for extern string.\n"
 
+
+/*
+ * fist pass messages
+ */
+#define ERR_INVALID_LABEL_NAME "Invalid label name '%s'."
+#define ERR_SYMBOL_EXISTS "Symbol '%s' already exists."
+#define ERR_SYMBOL_DEFINED "Symbol '%s' already defined."
+#define ERR_OPERAND_MUST_BE_VALID_REGISTER "Operands for '%s' must be valid registers ($0-$31)."
+#define ERR_OPERAND_MUST_BE_VALID_LABEL "Operand for '%s' must be a valid label."
+#define INVALID_R_OPCODE "Invalid R-type opcode."
+#define INVALID_I_OPCODE "Invalid I-type opcode."
+#define INVALID_J_OPCODE "Invalid J-type opcode."
+#define ERR_UNKNOWN_INSTRUCTION "Unknown instruction type."
+#define ERR_INVALID_OPRANDS "Invalid operands for '%s'."
+#define ERR_OPERANDS_ARE_NOT_REGISTERS "First two operands for '%s' must be registers."
+#define ERR_OPERAND_IS_NOT_LABEL "Third operand for '%s' must be a valid label."
+#define ERR_INVALID_REGISTER_JMP "Invalid register for jmp."
+#define ERR_INVALID_LABEL_JMP "Invalid label for jmp."
+
+/*
+ * second pass messages
+ */
+#define ERR_UNKNOWN_INSTRUCTION_OR_DIRECTIVE "Unknown instruction or directive '%s'."
+#define ERR_MISSING_LABEL_AFTER_ENTRY "Missing label name after .entry directive."
+#define ERR_ENTRY_LABEL_NOT_DEFINED "Entry label '%s' is not defined in the source file."
+#define ERR_SYMBOL_BOTH_ENTRY_AND_EXTERN "Symbol '%s' cannot be both ENTRY and EXTERNAL."
+#define ERR_UNKNOWN_INSTRUCTION "Unknown instruction '%s'."
+#define ERR_UNDEFINED_LABEL_IN_BRANCH "Undefined label '%s' used in branch instruction."
+#define ERR_BRANCH_TO_EXTERN "Cannot branch to external symbol '%s'."
+#define ERR_UNDEFINED_LABEL_J_TYPE "Undefined label '%s' used in J-type instruction."
+#define ERR_FAILED_TO_RECORD_EXTERN "Failed to record external symbol usage."
+
+
+
+
 #endif

@@ -39,7 +39,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 
 
 		if (isLineTooLong(current_line, macro_file)) {
-			ASM_ERROR(line_counter, ("Line exceeds maximum length of 80 characters."));
+			ASM_ERROR(line_counter, (ERR_LINE_TOO_LONG));
 			pass_status = FAILURE;
 		}
 		else{
@@ -67,7 +67,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 							second_pass_ic += INSTRUCTION_BYTES_SIZE;
 						}
 						else {
-							ASM_ERROR(line_counter, ("Unknown instruction or directive '%s'.", token));
+							ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_OR_DIRECTIVE, token));
 							pass_status = FAILURE;
 						}
 					}
@@ -84,18 +84,18 @@ Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_cou
 	SymbolTableNode *symbol_node;
 
 	if (!getNextToken(line, label_name)) {
-		ASM_ERROR(line_counter, ("Missing label name after .entry directive."));
+		ASM_ERROR(line_counter, (ERR_MISSING_LABEL_AFTER_ENTRY));
 		return FAILURE;
 	}
 
 	symbol_node = findSymbol(*symbol_table, label_name);
 	if (symbol_node == NULL) {
-		ASM_ERROR(line_counter, ("Entry label '%s' is not defined in the source file.", label_name));
+		ASM_ERROR(line_counter, (ERR_ENTRY_LABEL_NOT_DEFINED, label_name));
 		return FAILURE;
 	}
 
 	if (symbol_node->symbol_table_entry.attributes & EXTERNAL) {
-		ASM_ERROR(line_counter, ("Symbol '%s' cannot be both ENTRY and EXTERNAL.", label_name));
+		ASM_ERROR(line_counter, (ERR_SYMBOL_BOTH_ENTRY_AND_EXTERN, label_name));
 		return FAILURE;
 	}
 
@@ -120,7 +120,7 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 
 	instruction = getInstruction(instruction_name);
 	if (instruction == NULL) {
-		ASM_ERROR(line_counter, ("Unknown instruction '%s'.", instruction_name));
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, instruction_name));
 		return FAILURE;
 	}
 
@@ -137,12 +137,12 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 			label_name = operands[2];
 			symbol_node = findSymbol(*symbol_table, label_name);
 			if (symbol_node == NULL) {
-				ASM_ERROR(line_counter, ("Undefined label '%s' used in branch instruction.", label_name));
+				ASM_ERROR(line_counter, (ERR_UNDEFINED_LABEL_IN_BRANCH, label_name));
 				return FAILURE;
 			}
 
 			if (symbol_node->symbol_table_entry.attributes & EXTERNAL) {
-				ASM_ERROR(line_counter, ("Cannot branch to external symbol '%s'.", label_name));
+				ASM_ERROR(line_counter, (ERR_BRANCH_TO_EXTERN, label_name));
 				return FAILURE;
 			}
 
@@ -163,7 +163,7 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 			label_name = operands[0];
 			symbol_node = findSymbol(*symbol_table, label_name);
 			if (symbol_node == NULL) {
-				ASM_ERROR(line_counter, ("Undefined label '%s' used in J-type instruction.", label_name));
+				ASM_ERROR(line_counter, (ERR_UNDEFINED_LABEL_J_TYPE, label_name));
 				return FAILURE;
 			}
 
@@ -172,7 +172,7 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 				extern_entry.address = ic;
 
 				if (addEntryToExternTable(extern_table, extern_entry) == FAILURE) {
-					ASM_ERROR(line_counter, ("Failed to record external symbol usage."));
+					ASM_ERROR(line_counter, (ERR_FAILED_TO_RECORD_EXTERN));
 					return FAILURE;
 				}
 			}
@@ -184,12 +184,12 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 		case HLT:
 			break;
 		default:
-			ASM_ERROR(line_counter, ("Invalid J-type opcode."));
+			ASM_ERROR(line_counter, (INVALID_J_OPCODE));
 			return FAILURE;
 		}
 		break;
 	default:
-		ASM_ERROR(line_counter, ("Unknown instruction type."));
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION));
 		return FAILURE;
 	}
 	return SUCCESS;

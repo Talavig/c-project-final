@@ -54,7 +54,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 		memset(token, 0, sizeof(token));
 
 		if (isLineTooLong(current_line, macro_file)) {
-			ASM_ERROR(line_counter, ("Line exceeds maximum length of 80 characters."));
+			ASM_ERROR(line_counter, (ERR_LINE_TOO_LONG));
 			pass_status = FAILURE;
 		}
 		else{
@@ -67,7 +67,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 						has_label = TRUE;
 						token[token_len - 1] = '\0';
 						if (!isValidLabel(token)) {
-							ASM_ERROR(line_counter, ("Invalid label name '%s'.", token));
+							ASM_ERROR(line_counter, (ERR_INVALID_LABEL_NAME, token));
 							pass_status = FAILURE;
 						}
 						else{
@@ -143,7 +143,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 			}
 		}
 		else{
-			ASM_ERROR(line_counter, ("Symbol '%s' already exists.", label_name));
+			ASM_ERROR(line_counter, (ERR_SYMBOL_EXISTS, label_name));
 			return FAILURE;
 		}
 	}
@@ -270,7 +270,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			}
 		}
 		else{
-			ASM_ERROR(line_counter, ("Symbol '%s' already defined.", label_name));
+			ASM_ERROR(line_counter, (ERR_SYMBOL_DEFINED, label_name));
 			return FAILURE;
 		}
 	}
@@ -302,20 +302,20 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		switch (instruction->opcode){
 		case R_INSTRUCTIONS_ARITHMATIC_OPCODES:
 			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseRegister(operands[2], &rd)){
-				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction->name));
+				ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_REGISTER, instruction->name));
 				return FAILURE;
 			}
 			break;
 
 		case R_INSTRUCTIONS_MEMORY_OPCODES:
 			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rd)) {
-				ASM_ERROR(line_counter, ("Operands for '%s' must be valid registers ($0-$31).", instruction->name));
+				ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_REGISTER, instruction->name));
 				return FAILURE;
 			}
 			break;
 
 		default:
-			ASM_ERROR(line_counter, ("Invalid R-type opcode."));
+			ASM_ERROR(line_counter, (INVALID_R_OPCODE));
 			return FAILURE;
 		}
 
@@ -329,24 +329,24 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			switch (instruction->opcode){
 			case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB:   case SB:   case LW:   case SW:  case LH:  case SH:
 				if (!parseRegister(operands[0], &rs) || !parseImmediate(operands[1], &immed) || !parseRegister(operands[2], &rt)) {
-					ASM_ERROR(line_counter, ("Invalid operands for '%s'.", instruction->name));
+					ASM_ERROR(line_counter, (ERR_INVALID_OPRANDS, instruction->name));
 					return FAILURE;
 				}
 				break;
 
 			case BNE: case BEQ: case BLT: case BGT:
 				if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt)) {
-					ASM_ERROR(line_counter, ("First two operands for '%s' must be registers.", instruction->name));
+					ASM_ERROR(line_counter, (ERR_OPERANDS_ARE_NOT_REGISTERS, instruction->name));
 					return FAILURE;
 				}
 				if (!isValidLabel(operands[2])) {
-					ASM_ERROR(line_counter, ("Third operand for '%s' must be a valid label.", instruction->name));
+					ASM_ERROR(line_counter, (ERR_OPERAND_IS_NOT_LABEL, instruction->name));
 					return FAILURE;
 				}
 				break;
 
 			default:
-				ASM_ERROR(line_counter, ("Invalid I-type opcode."));
+				ASM_ERROR(line_counter, (INVALID_I_OPCODE));
 				return FAILURE;
 			}
 
@@ -363,14 +363,14 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 				case JMP:
 					if (operands[0][0] == REGISTER_INDICATOR) {
 						if (!parseRegister(operands[0], &rs)) {
-							ASM_ERROR(line_counter, ("Invalid register for jmp."));
+							ASM_ERROR(line_counter, (ERR_INVALID_REGISTER_JMP));
 							return FAILURE;
 						}
 						address = rs;
 					}
 					else{
 						if (!isValidLabel(operands[0])) {
-							ASM_ERROR(line_counter, ("Invalid label for jmp."));
+							ASM_ERROR(line_counter, (ERR_INVALID_LABEL_JMP));
 							return FAILURE;
 						}
 					}
@@ -378,13 +378,13 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 
 				case LA: case CALL:
 					if (!isValidLabel(operands[0])) {
-						ASM_ERROR(line_counter, ("Operand for '%s' must be a valid label.", instruction->name));
+						ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_LABEL, instruction->name));
 						return FAILURE;
 					}
 					break;
 
 				default:
-					ASM_ERROR(line_counter, ("Invalid J-type opcode."));
+					ASM_ERROR(line_counter, (INVALID_J_OPCODE));
 					return FAILURE;
 				}
 				machine_code |= (reg << REG_JUMP_SHIFT);
@@ -392,7 +392,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 				break;
 
 				default:
-					ASM_ERROR(line_counter, ("Unknown instruction type."));
+					ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION));
 					return FAILURE;
 	}
 
