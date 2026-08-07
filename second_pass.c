@@ -60,10 +60,10 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 							}
 						}
 						else if (isInstruction(token)) {
-							if (encodeCodeTraversalInstructions(&current_line_ptr, token, symbol_table, ic, code_image, extern_table, line_counter) == FAILURE) {
+							if (encodeCodeTraversalInstructions(&current_line_ptr, token, symbol_table, second_pass_ic, code_image, extern_table, line_counter) == FAILURE) {
 								pass_status = FAILURE;
 							}
-							ic += INSTRUCTION_BYTES_SIZE;
+							second_pass_ic += INSTRUCTION_BYTES_SIZE;
 						}
 						else {
 							ASM_ERROR(line_counter, ("Unknown instruction or directive '%s'.", token));

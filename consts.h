@@ -154,7 +154,7 @@ typedef struct {
 } Instruction;
 
 extern Instruction instructions[];
-extern const int NUM_INSTRUCTIONS_CONST;
+extern const int NUM_INSTRUCTIONS;
 
 /*
  * bitshift consts

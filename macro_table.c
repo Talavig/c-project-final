@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "macro_table.h"
 #include "consts.h"
 #include "messages.h"
 
@@ -78,7 +79,7 @@ void freeMacroTable(MacroTableEntry* start){
 		}
 		free(current);
 
-		current = next_node;
+		current = next_entry;
 	}
 }
 

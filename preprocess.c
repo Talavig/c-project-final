@@ -73,7 +73,7 @@ Status preprocessScript(char * file_base_name){
 			current_line_ptr = skipWhitespaces(current_line_ptr);
 			if (isEmptyOrComment(current_line_ptr)) {
 				if (is_macro) {
-					if (addLineToMacro(current_macro, current_line) == FAILURE) {
+					if (addLineToMacro(current_entry, current_line) == FAILURE) {
 						run_status = FAILURE;
 					}
 					else{

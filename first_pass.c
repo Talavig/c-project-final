@@ -236,12 +236,12 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 		}
 
 		else{
-			if(existing_symbol->symbol_table_entry.attributes & ATTR_CODE){
-				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE, existing_symbol->symbol_table_entry.name));
+			if(existing_symbol->symbol_table_entry.attributes & CODE){
+				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE, existing_symbol->symbol_table_entry.symbol));
 				return FAILURE;
 			}
-			if(existing_symbol->symbol_table_entry.attributes & ATTR_DATA){
-				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA, existing_symbol->symbol_table_entry.name));
+			if(existing_symbol->symbol_table_entry.attributes & DATA){
+				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA, existing_symbol->symbol_table_entry.symbol));
 				return FAILURE;
 			}
 		}
@@ -268,7 +268,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	int i;
 
 	if (has_label) {
-		if (findSymbol(SymbolTable symbol_table, label_name) == NULL){
+		if (findSymbol(symbol_table, label_name) == NULL){
 			code_entry.symbol = label_name;
 			code_entry.value = *ic;
 			code_entry.attributes = CODE;
@@ -288,7 +288,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		return FAILURE;
 	}
 
-	if (extractOperands(ptr, operands, &operand_count, line_counter) == FAILURE) {
+	if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -414,7 +414,7 @@ void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
 	SymbolTableNode *current = symbol_table;
 	if (symbol_table == NULL) return;
 	while (current != NULL) {
-		if (current->symbol_table_entry.attributes & ATTR_DATA) {
+		if (current->symbol_table_entry.attributes & DATA) {
 			current->symbol_table_entry.value += icf;
 		}
 		current = current->next;
