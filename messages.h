@@ -16,7 +16,7 @@
     } while(0)
 
 
-#define NO_ARGUMENTS_PASSED "Please pass at least one argument for assembler."
+
 #define WRONG_FILE_EXTENTION "You may only pass files with .as to the assembler, please rename your file."
 
 #define ERR_ALLOCATION_FAILED "Internal Error: Memory allocation failed for filenames.\n"
@@ -64,6 +64,23 @@
 #define ERR_INSTRUCTION_OPRAND_COUNT_HIGH "Instruction '%s' got too many arguments expects %d operands, got %d."
 
 
+/*
+ * assmbler messages
+ */
+#define NO_ARGUMENTS_PASSED "Please pass at least one argument for assembler."
+#define ERR_IMAGE_MEMORY_ALLOCATION_FAILED "Error: Memory allocation for code/data failed for file %s.\n"
+#define ERR_INVAILD_FILE_EXTENTION "Error: File '%s' does not have a valid '%s' extension. Skipping to next file.\n"
+#define ERR_MEMORY_ALLOCATION_FILE_BASE_NAME_FAILED "Error: Memory allocation failed for file name parsing.\n"
+
+#define INFO_ASSEMBLING "Assembling %s...\n"
+#define PREPROCESSING_ERRORS_FOUND "Errors found during the first pass of %s. Skipping to next file.\n"
+#define FIRST_PASS_ERRORS_FOUND "Errors found during the first pass of %s. Skipping to next file.\n"
+#define SECOND_PASS_ERRORS_FOUND "Errors found during the second pass of %s. Skipping to next file.\n"
+#define INFO_SUCCESSULLY_COMPILED "Successfully compiled %s!\n"
+#define ERR_GENERATION_OUTPUT_FILES_FAILED "Failed to generate output files for %s.\n"
+#define ERR_CANNOT_CREATE_OBJECT_FILE "Error: Cannot create object file %s\n"
+#define ERR_CANNOT_CREATE_ENTRIES_FILE "Error: Cannot create entries file %s\n"
+#define ERR_CANNOT_CREATE_EXTERNALS_FILE "Error: Cannot create externals file %s\n"
 
 
 #endif

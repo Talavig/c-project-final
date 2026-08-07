@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -ansi -pedantic
 
 turn_on: assembler.c
-	$(CC) $(CFLAGS) assembler.c -o assembler
+	$(CC) $(CFLAGS) *.c -o assembler
 
 clean:
-	rm -f assembler *.o
+	rm -f assembler *.o *.am *.ob *.ent *.ext

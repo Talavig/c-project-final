@@ -1,5 +1,5 @@
-#ifndef EXT_TABLE_H
-#define EXT_TABLE_H
+#ifndef EXTERN_TABLE_H
+#define EXTERN_TABLE_H
 
 #include "consts.h"
 

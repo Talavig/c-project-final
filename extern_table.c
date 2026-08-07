@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "entry_table.h"
+#include "extern_table.h"
 
 
 ExternTable initializeExternTable() {

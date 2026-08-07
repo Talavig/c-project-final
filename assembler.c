@@ -25,59 +25,76 @@ int main(int argc, char *argv[]){
 	int i;
 	unsigned long * code_image;
 	unsigned char * data_image;
+	int file_name_len;
 	char *file_base_name;
 
 
 	if (argc < 2){
-		fprintf(stderr, "Usage: %s <file1> <file2> ...\n", argv[0]);
+		fprintf(stderr, NO_ARGUMENTS_PASSED);
 		return EXIT_FAILURE;
 	}
 
 
 
 	for (i = 1; i < argc; i++){
-		file_base_name = argv[i];
-		ic = IC_INITIAL_VALUE;
-		dc = DC_INITIAL_VALUE;
-		code_image = (unsigned long *)calloc(MAX_MEMORY_SIZE / 4, sizeof(unsigned long));;
-		data_image = (unsigned char *)calloc(MAX_MEMORY_SIZE, sizeof(unsigned char));
-		symbol_table = NULL;
-		extern_table = NULL;
-
-		if (code_image == NULL || data_image == NULL) {
-			fprintf(stderr, "Error: Memory allocation failed for file %s.\n", file_base_name);
-			if (code_image){
-				free(code_image);
-			}
-			if (data_image){
-				free(data_image);
-			}
+		file_name_len = strlen(argv[i]);
+		if (file_name_len < 3 || strcmp(argv[i] + file_name_len - 3, INPUT_ASSEMBLY_FILE) != 0) {
+			fprintf(stderr, ERR_INVAILD_FILE_EXTENTION, argv[i], INPUT_ASSEMBLY_FILE);
 		}
 		else{
-			printf("Assembling %s...\n", file_base_name);
-
-			if(preprocessScript(file_base_name) == FAILURE){
-				printf("Errors found during the first pass of %s. Skipping to next file.\n", file_base_name);
-			}
-			else if (firstPass(file_base_name, &symbol_table, &ic, &dc, data_image, code_image) == FAILURE){
-				printf("Errors found during the first pass of %s. Skipping to next file.\n", file_base_name);
-			}
-			else if (secondPass(file_base_name, symbol_table, ic, dc) == FAILURE){
-				printf("Errors found during the second pass of %s. Skipping to next file.\n", file_base_name);
+			file_base_name = (char *)malloc(file_name_len - 2);
+			if (file_base_name == NULL) {
+				fprintf(stderr, ERR_MEMORY_ALLOCATION_FILE_BASE_NAME_FAILED);
 			}
 			else{
-				if (generate_output_files(file_base_name, &symbol_table, &extern_table, ic, dc, data_image, code_image) == SUCCESS){
-					printf("Successfully compiled %s!\n", file_base_name);
+				strncpy(file_base_name, argv[i], len - 3);
+				file_base_name[len - 3] = '\0';
+				ic = IC_INITIAL_VALUE;
+				dc = DC_INITIAL_VALUE;
+				code_image = (unsigned long *)calloc(MAX_MEMORY_SIZE / 4, sizeof(unsigned long));
+				data_image = (unsigned char *)calloc(MAX_MEMORY_SIZE, sizeof(unsigned char));
+				symbol_table = NULL;
+				extern_table = NULL;
+
+				if (code_image == NULL || data_image == NULL) {
+					fprintf(stderr, ERR_IMAGE_MEMORY_ALLOCATION_FAILED, file_base_name);
+					if (code_image){
+						free(code_image);
+					}
+					if (data_image){
+						free(data_image);
+					}
 				}
 				else{
-					printf("Failed to generate output files for %s.\n", file_base_name);
+					printf(INFO_ASSEMBLING, argv[i]);
+
+					if(preprocessScript(file_base_name) == FAILURE){
+						printf(PREPROCESSING_ERRORS_FOUND, argv[i]);
+					}
+					else if (firstPass(file_base_name, &symbol_table, &ic, &dc, data_image, code_image) == FAILURE){
+						printf(FIRST_PASS_ERRORS_FOUND, argv[i]);
+					}
+					else if (secondPass(file_base_name, &symbol_table, code_image, &extern_table) == FAILURE) {
+						printf(SECOND_PASS_ERRORS_FOUND, argv[i]);
+					}
+					else{
+						if (generate_output_files(file_base_name, &symbol_table, &extern_table, ic, dc, data_image, code_image) == SUCCESS){
+							printf(INFO_SUCCESSULLY_COMPILED, argv[i]);
+						}
+						else{
+							printf(ERR_GENERATION_OUTPUT_FILES_FAILED, argv[i]);
+						}
+					}
+					free(code_image);
+					free(data_image);
+					freeSymbolTable(&symbol_table);
+					freeExternTable(&extern_table);
 				}
 			}
-			free(code_image);
-			free(data_image);
-			freeSymbolTable(&symbol_table);
-			freeExternTable(&extern_table);
+			free(file_base_name);
+
 		}
+
 	}
 	return EXIT_SUCCESS;
 }
@@ -121,7 +138,7 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 
 	object_file = fopen(object_file_name, "w");
 	if (object_file == NULL) {
-		fprintf(stderr, "Error: Cannot create object file %s\n", object_file_name);
+		fprintf(stderr, ERR_CANNOT_CREATE_OBJECT_FILE, object_file_name);
 		free(object_file_name);
 		return FAILURE;
 	}
@@ -161,7 +178,7 @@ static Status createEntriesFile(char *file_base_name, SymbolTable *symbol_table)
 				}
 				entries_file = fopen(entries_file_name, "w");
 				if (entries_file == NULL) {
-					fprintf(stderr, "Error: Cannot create entry file %s\n", entries_file_name);
+					fprintf(stderr, ERR_CANNOT_CREATE_ENTRIES_FILE, entries_file_name);
 					free(entries_file_name);
 					return FAILURE;
 				}
@@ -197,7 +214,7 @@ static Status createExternalsFile(char *file_base_name, ExternTable *extern_tabl
 
 	externals_file = fopen(externals_file_name, "w");
 	if (externals_file == NULL) {
-		fprintf(stderr, "Error: Cannot create externals file %s\n", externals_file_name);
+		fprintf(stderr, ERR_CANNOT_CREATE_EXTERNALS_FILE, externals_file_name);
 		free(externals_file_name);
 		return FAILURE;
 	}
