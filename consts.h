@@ -61,8 +61,8 @@
 #define DW_DIRECTIVE ".dw"
 #define DH_DIRECTIVE ".dh"
 #define ASCIZ_DIRECTIVE ".asciz"
-#define ENTRY_DIRECTIVE "entry"
-#define EXTERN_DIRECTIVE "extern"
+#define ENTRY_DIRECTIVE ".entry"
+#define EXTERN_DIRECTIVE ".extern"
 
 
 /*

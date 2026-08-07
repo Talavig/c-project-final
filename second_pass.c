@@ -120,7 +120,7 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 
 	instruction = getInstruction(instruction_name);
 	if (instruction == NULL) {
-		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, instruction_name));
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_NAME, instruction_name));
 		return FAILURE;
 	}
 
@@ -189,7 +189,7 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 		}
 		break;
 	default:
-		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION));
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_TYPE));
 		return FAILURE;
 	}
 	return SUCCESS;

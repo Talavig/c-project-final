@@ -38,7 +38,7 @@ Instruction instructions[] = {
 		{"jmp", J_TYPE, JMP, 1, NON_R_FUNCT_VALUE},
 		{"la", J_TYPE, LA, 1, NON_R_FUNCT_VALUE},
 		{"call", J_TYPE, CALL, 1, NON_R_FUNCT_VALUE},
-		{"hlt", J_TYPE, HLT, 1, NON_R_FUNCT_VALUE}
+		{"hlt", J_TYPE, HLT, 0, NON_R_FUNCT_VALUE}
 };
 
 const int NUM_INSTRUCTIONS = sizeof(instructions) / sizeof(Instruction);

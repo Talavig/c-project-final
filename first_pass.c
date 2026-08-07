@@ -79,18 +79,21 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 						}
 					}
 					if (token[0] != '\0'){
+						printf("%s",token);
 						if(isDataDirective(token) && handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_counter) == FAILURE){
 							pass_status = FAILURE;
 						}
-						else if((isExternDirective(token) || isEntryDirective(token)) && handleEDirective(&current_line_ptr, token, has_label, label_name, symbol_table, data_image, line_counter) == FAILURE){
-							pass_status = FAILURE;
+						else if (isExternDirective(token) || isEntryDirective(token)) {
+							if (handleEDirective(&current_line_ptr, token, has_label, label_name, symbol_table, data_image, line_counter) == FAILURE) {
+								pass_status = FAILURE;
+							}
 						}
 						/* entry directives are handled in the second pass */
 						else if(isInstruction(token) && handleInstruction(&current_line_ptr, token, has_label, label_name, symbol_table, ic, code_image, line_counter) == FAILURE){
 							pass_status = FAILURE;
 						}
 						else{
-							ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, token));
+							ASM_ERROR(line_counter, (ERR_UNKNOWN_INST_OR_DIR, token));
 							pass_status = FAILURE;
 						}
 					}
@@ -199,7 +202,7 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
 	SymbolTableNode *existing_symbol;
-	SymbolTableEntry new_entry;
+	SymbolTableEntry new_entry = {0};
 
 	if (has_label) {
 		ASM_WARNING(line_counter, (WARN_LABEL_BEFORE_DIRECTIVE, label_name, directive));
@@ -221,7 +224,7 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 	if (strcmp(directive, EXTERN_DIRECTIVE) == 0){
 		existing_symbol = findSymbol(*symbol_table, operands[0]);
 		if(existing_symbol == NULL){
-			new_entry.symbol = operands[0];
+			strcpy(new_entry.symbol, operands[0]);
 			new_entry.value = 0;
 			new_entry.attributes = EXTERNAL;
 
@@ -276,7 +279,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	}
 	instruction = getInstruction(instruction_name);
 	if (instruction == NULL) {
-		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION, instruction->name));
+		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_NAME, instruction->name));
 		return FAILURE;
 	}
 
@@ -392,7 +395,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 				break;
 
 				default:
-					ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION));
+					ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_TYPE));
 					return FAILURE;
 	}
 

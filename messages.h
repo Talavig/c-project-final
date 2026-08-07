@@ -34,8 +34,7 @@
 
 
 #define ERR_INCOMPLETE_LABEL "Label without instruction/directive.\n"
-#define ERR_UNKNOWN_INSTRUCTION "Unknown instruction or directive '%s'\n"
-
+#define ERR_UNKNOWN_INST_OR_DIR "Unknown instruction or directive '%s'.\n"
 #define ERR_OPERAND_FIRST_COMMA "Illegal comma before the first operand.\n"
 #define ERR_CONSECUTIVE_COMMAS "Multiple consecutive commas.\n"
 #define ERR_MISSING_COMMA "Missing comma between operands.\n"
@@ -109,7 +108,7 @@
 #define INVALID_R_OPCODE "Invalid R-type opcode."
 #define INVALID_I_OPCODE "Invalid I-type opcode."
 #define INVALID_J_OPCODE "Invalid J-type opcode."
-#define ERR_UNKNOWN_INSTRUCTION "Unknown instruction type."
+#define ERR_UNKNOWN_INSTRUCTION_TYPE "Unknown instruction type."
 #define ERR_INVALID_OPRANDS "Invalid operands for '%s'."
 #define ERR_OPERANDS_ARE_NOT_REGISTERS "First two operands for '%s' must be registers."
 #define ERR_OPERAND_IS_NOT_LABEL "Third operand for '%s' must be a valid label."
@@ -123,7 +122,7 @@
 #define ERR_MISSING_LABEL_AFTER_ENTRY "Missing label name after .entry directive."
 #define ERR_ENTRY_LABEL_NOT_DEFINED "Entry label '%s' is not defined in the source file."
 #define ERR_SYMBOL_BOTH_ENTRY_AND_EXTERN "Symbol '%s' cannot be both ENTRY and EXTERNAL."
-#define ERR_UNKNOWN_INSTRUCTION "Unknown instruction '%s'."
+#define ERR_UNKNOWN_INSTRUCTION_NAME "Unknown instruction '%s'."
 #define ERR_UNDEFINED_LABEL_IN_BRANCH "Undefined label '%s' used in branch instruction."
 #define ERR_BRANCH_TO_EXTERN "Cannot branch to external symbol '%s'."
 #define ERR_UNDEFINED_LABEL_J_TYPE "Undefined label '%s' used in J-type instruction."
