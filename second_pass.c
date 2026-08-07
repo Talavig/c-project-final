@@ -60,13 +60,16 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 								pass_status = FAILURE;
 							}
 						}
-						else if (isInstruction(token) == FALSE) {
+						else if (isInstruction(token)) {
 							if (encodeCodeTraversalInstructions(&current_line_ptr, token, symbol_table, second_pass_ic, code_image, extern_table, line_counter) == FAILURE) {
 								pass_status = FAILURE;
 							}
-							second_pass_ic += INSTRUCTION_BYTES_SIZE;
+							else{
+								second_pass_ic += INSTRUCTION_BYTES_SIZE;
+							}
 						}
-						else {
+						else if (!isDataDirective(token) && !isExternDirective(token)){
+							printf("%s\n", token);
 							ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_OR_DIRECTIVE, token));
 							pass_status = FAILURE;
 						}

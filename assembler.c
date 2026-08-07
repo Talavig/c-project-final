@@ -67,14 +67,16 @@ int main(int argc, char *argv[]){
 				}
 				else{
 					printf(INFO_ASSEMBLING, argv[i]);
-
 					if(preprocessScript(file_base_name) == FAILURE){
+						printf("preprocess\n");
 						printf(PREPROCESSING_ERRORS_FOUND, argv[i]);
 					}
 					else if (firstPass(file_base_name, &symbol_table, &ic, &dc, data_image, code_image) == FAILURE){
+						printf("first pass\n");
 						printf(FIRST_PASS_ERRORS_FOUND, argv[i]);
 					}
 					else if (secondPass(file_base_name, &symbol_table, code_image, &extern_table) == FAILURE) {
+						printf("second pass\n");
 						printf(SECOND_PASS_ERRORS_FOUND, argv[i]);
 					}
 					else{

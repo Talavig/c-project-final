@@ -79,16 +79,20 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 						}
 					}
 					if (token[0] != '\0'){
-						if(isDataDirective(token) && handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_counter) == FAILURE){
-							pass_status = FAILURE;
+						if(isDataDirective(token)){
+							if(handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_counter) == FAILURE){
+								pass_status = FAILURE;
+							}
 						}
 						else if (isExternDirective(token) || isEntryDirective(token)) {
 							if (handleEDirective(&current_line_ptr, token, has_label, label_name, symbol_table, data_image, line_counter) == FAILURE) {
 								pass_status = FAILURE;
 							}
 						}
-						else if(isInstruction(token) && handleInstruction(&current_line_ptr, token, has_label, label_name, symbol_table, ic, code_image, line_counter) == FAILURE){
-							pass_status = FAILURE;
+						else if(isInstruction(token)){
+							if(handleInstruction(&current_line_ptr, token, has_label, label_name, symbol_table, ic, code_image, line_counter) == FAILURE){
+								pass_status = FAILURE;
+							}
 						}
 						else{
 							ASM_ERROR(line_counter, (ERR_UNKNOWN_INST_OR_DIR, token));
@@ -158,9 +162,11 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 		last_quote = strrchr(*line, STRING_WRAPPER);
 		if(last_quote == first_quote){
 			ASM_ERROR(line_counter, (ERR_MISSING_CLOSING_QUOTES));
+			return FAILURE;
 		}
 		if (strchr(first_quote + 1, STRING_WRAPPER) != last_quote) {
 			ASM_ERROR(line_counter, (ERR_TOO_MANY_QUOTES_IN_STRING));
+			return FAILURE;
 		}
 		line_ptr = first_quote + 1;
 		while(*line_ptr != STRING_WRAPPER){
@@ -260,7 +266,6 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	int immed = 0;
 	int reg = 0;
 	long address = 0;
-	printf("DEBUG handleInstruction: processing %s, operand_count=%d\n", instruction_name, operand_count);
 	if (has_label) {
 		if (findSymbol(*symbol_table, label_name) == NULL){
 			strcpy(code_entry.symbol,label_name);
@@ -285,9 +290,6 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE) {
 		return FAILURE;
 	}
-	else{
-		printf("SUCCESS! Extracted %d operands: [%s], [%s], [%s]\n",operand_count, operands[0], operands[1], operands[2]);
-	}
 
 	if (operand_count < instruction->oprands) {
 		ASM_ERROR(line_counter, (ERR_INSTRUCTION_OPRAND_COUNT_LOW, instruction->name, instruction->oprands, operand_count));
@@ -300,8 +302,6 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	}
 
 	machine_code |= (instruction->opcode << OPCODE_SHIFT);
-
-	printf("DEBUG handleInstruction validating instruction: %s (type: %d) with %d operands\n",instruction->name, instruction->type, operand_count);
 
 	switch (instruction->type) {
 	case R_TYPE:
@@ -325,7 +325,6 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			return FAILURE;
 		}
 
-		machine_code |= (instruction->opcode << OPCODE_SHIFT);
 		machine_code |= (rs << RS_SHIFT);
 		machine_code |= (rt << RT_SHIFT);
 		machine_code |= (rd << RD_SHIFT);
@@ -334,8 +333,8 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 
 		case I_TYPE:
 			switch (instruction->opcode){
-			case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB:   case SB:   case LW:   case SW:  case LH:  case SH:
-				if (!parseRegister(operands[0], &rt) || !parseRegister(operands[1], &rs) || !parseImmediate(operands[2], &immed)) {
+			case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB: case SB: case LW: case SW: case LH: case SH:
+				if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseImmediate(operands[2], &immed)) {
 					ASM_ERROR(line_counter, (ERR_INVALID_OPRANDS, instruction->name));
 					return FAILURE;
 				}

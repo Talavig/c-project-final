@@ -67,7 +67,7 @@ Boolean parseRegister(const char *str, int *reg_num) {
 		return FALSE;
 	}
 
-	if (parsed_val > 0 && parsed_val < NUM_REGISTERS) {
+	if (parsed_val >= 0 && parsed_val < NUM_REGISTERS) {
 		*reg_num = (int)parsed_val;
 		return TRUE;
 	}
@@ -77,6 +77,7 @@ Boolean parseRegister(const char *str, int *reg_num) {
 
 
 Boolean parseImmediate(const char *str, int *val) {
+	printf(str);
 	char *endp;
 	long parsed_val;
 
@@ -135,7 +136,6 @@ Boolean getNextToken(char **line, char *token) {
 
 
 Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *operand_count, int line_counter){
-	printf("DEBUG extractOperands sees line starting with: '%s'\n", *line);
 	Boolean expect_comma = FALSE;
 	*operand_count = 0;
 	memset(operands, 0, MAX_OPERANDS_PER_LINE * MAX_TOKEN_LENGTH * sizeof(char));
@@ -214,7 +214,6 @@ Boolean isLabelDef(char *token){
 }
 
 Boolean isDataDirective(char* token){
-	printf("DEBUG isDataDirective checking token: '%s' (length: %lu)\n", token, strlen(token));
 	return (strcmp(token, DB_DIRECTIVE) == 0 || strcmp(token, DW_DIRECTIVE) == 0 || strcmp(token, DH_DIRECTIVE) == 0 || strcmp(token, ASCIZ_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
@@ -257,7 +256,6 @@ Boolean isReservedWord(char *word){
 	if (strcmp(word, MACRO_START) == 0 || strcmp(word, MACRO_END) == 0) {
 		return TRUE;
 	}
-
 	return FALSE;
 }
 
