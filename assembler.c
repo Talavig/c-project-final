@@ -127,17 +127,17 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 		return FAILURE;
 	}
 
-	fprintf(object_file, "\t%d %d\n", ic - IC_INITIAL_VALUE, data_count);
+	fprintf(object_file, OUTPUT_HEADER_FORMAT, ic - IC_INITIAL_VALUE, data_count);
 
 	current_address = IC_INITIAL_VALUE;
 	for (i = 0; i < instruction_count; i++) {
-		fprintf(object_file, "%04d %08lX\n", current_address, (code_image[i] & 0xFFFFFFFF));
+		fprintf(object_file, OUTPUT_CODE_FORMAT, current_address, (code_image[i] & PRINT_MASK_32));
 		current_address += INSTRUCTION_BYTES_SIZE;
 	}
 
 	current_address = ic;
 	for (i = 0; i < data_count; i++) {
-		fprintf(ob_file, "%04d %02X\n", current_address, (data_image[i] & 0xFF));
+		fprintf(ob_file, OUTPUT_DATA_FORMAT, current_address, (data_image[i] & PRINT_MASK_8));
 		current_address++;
 	}
 
@@ -168,7 +168,7 @@ static Status createEntriesFile(char *file_base_name, SymbolTable *symbol_table)
 				}
 				file_created = TRUE;
 			}
-			fprintf(entries_file, "%s %04d\n", current->entry.symbol, current->entry.value);
+			fprintf(entries_file, OUTPUT_SYMBOL_FORMAT, current->entry.symbol, current->entry.value);
 		}
 		current = current->next;
 	}
@@ -205,7 +205,7 @@ static Status createExternalsFile(char *file_base_name, ExternTable *extern_tabl
 
 	current = *extern_table;
 	while (current != NULL) {
-		fprintf(externals_file, "%s %04d\n", current->extern_table_entry.symbol, current->extern_table_entry.address);
+		fprintf(externals_file, OUTPUT_SYMBOL_FORMAT, current->extern_table_entry.symbol, current->extern_table_entry.address);
 		current = current->next_entry;
 	}
 

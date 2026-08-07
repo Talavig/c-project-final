@@ -1,3 +1,6 @@
+#ifndef CONSTS
+#define CONSTS
+
 /*
  * machine related consts
  */
@@ -204,3 +207,17 @@ Instruction instructions[] = {
 
 #define CODE_IMAGE_SIZE 4096
 #define DATA_IMAGE_SIZE 4096
+
+/*
+ * output files consts
+ */
+
+#define PRINT_MASK_32 0xFFFFFFFF
+#define PRINT_MASK_8 0xFF
+
+#define OUTPUT_HEADER_FORMAT "\t%d %d\n"
+#define OUTPUT_CODE_FORMAT "%04d %08lX\n"
+#define OUTPUT_DATA_FORMAT "%04d %02X\n"
+#define OUTPUT_SYMBOL_FORMAT "%s %04d\n"
+
+#endif
