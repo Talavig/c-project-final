@@ -47,8 +47,8 @@ int main(int argc, char *argv[]){
 				fprintf(stderr, ERR_MEMORY_ALLOCATION_FILE_BASE_NAME_FAILED);
 			}
 			else{
-				strncpy(file_base_name, argv[i], len - 3);
-				file_base_name[len - 3] = '\0';
+				strncpy(file_base_name, argv[i], file_name_len - 3);
+				file_base_name[file_name_len - 3] = '\0';
 				ic = IC_INITIAL_VALUE;
 				dc = DC_INITIAL_VALUE;
 				code_image = (unsigned long *)calloc(MAX_MEMORY_SIZE / 4, sizeof(unsigned long));

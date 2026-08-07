@@ -1,8 +1,10 @@
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "consts.h"
+#include "messages.h"
 
 Instruction instructions[] = {
 		{"add", R_TYPE, R_INSTRUCTIONS_ARITHMATIC_OPCODES, 3, ADD},
@@ -41,6 +43,59 @@ Instruction instructions[] = {
 
 const int NUM_INSTRUCTIONS = sizeof(instructions) / sizeof(Instruction);
 
+Instruction * getInstruction(char* instruction_name){
+	int i;
+	for (i = 0; i < NUM_INSTRUCTIONS; i++) {
+		if (strcmp(instructions[i].name, instruction_name) == 0) {
+			return &instructions[i];
+		}
+	}
+	return NULL;
+}
+
+Boolean parseRegister(const char *str, int *reg_num) {
+	char *endp;
+	long parsed_val;
+
+	if (str == NULL || str[0] != REGISTER_INDICATOR) {
+		return FALSE;
+	}
+
+	parsed_val = strtol(str + 1, &endp, 10);
+
+	if (*endp != '\0') {
+		return FALSE;
+	}
+
+	if (parsed_val > 0 && parsed_val < NUM_REGISTERS) {
+		*reg_num = (int)parsed_val;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+
+Boolean parseImmediate(const char *str, int *val) {
+	char *endp;
+	long parsed_val;
+
+	if (str == NULL || *str == '\0') {
+		return FALSE;
+	}
+
+	parsed_val = strtol(str, &endp, 10);
+
+	if (*endp != '\0') {
+		return FALSE;
+	}
+
+	if (parsed_val <= MAX_IMMED_VALUE && parsed_val >= MIN_IMMED_VALUE) {
+		*val = (int)parsed_val;
+		return TRUE;
+	}
+	return FALSE;
+}
 
 
 char *skipWhitespaces(char *str) {
@@ -102,7 +157,7 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 				return FAILURE;
 			}
 
-			if (getNextToken(ptr, operands[*operand_count])){
+			if (getNextToken(line, operands[*operand_count])){
 				(*operand_count)++;
 				expect_comma = TRUE;
 			}
@@ -143,7 +198,7 @@ Boolean isLineTooLong(const char *line, FILE *file){
 }
 
 Boolean isEmptyOrComment(char *current_line){
-	return *(current_line == END_OF_STRING || *current_line == COMMENT) ? TRUE : FALSE;
+	return (*current_line == END_OF_STRING || *current_line == COMMENT) ? TRUE : FALSE;
 }
 
 Boolean isLabelDef(char *token){
@@ -226,62 +281,6 @@ Boolean isValidLabel(char *str){
 	return TRUE;
 }
 
-Boolean parseRegister(const char *str, int *reg_num) {
-	char *endp;
-	long parsed_val;
-
-	if (str == NULL || str[0] != REGISTER_INDICATOR) {
-		return FALSE;
-	}
-
-	parsed_val = strtol(str + 1, &endp, 10);
-
-	if (*endp != '\0') {
-		return FALSE;
-	}
-
-	if (parsed_val > 0 && parsed_val < NUM_REGISTERS) {
-		*reg_num = (int)parsed_val;
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-
-Boolean parseImmediate(const char *str, int *val) {
-	char *endp;
-	long parsed_val;
-
-	if (str == NULL || *str == '\0') {
-		return FALSE;
-	}
-
-	parsed_val = strtol(str, &endp, 10);
-
-	if (*endp != '\0') {
-		return FALSE;
-	}
-
-	if (parsed_val <= MAX_IMMED_VALUE && parsed_val >= MIN_IMMED_VALUE) {
-		*val = (int)parsed_val;
-		return TRUE;
-	}
-	return FALSE;
-}
-
-
-
-
-Instruction * getInstruction(char* instruction_name){
-	int i;
-	for (i = 0; i < NUM_INSTRUCTIONS; i++) {
-		if (strcmp(instructions[i].name, name) == 0) {
-			return &instructions[i];
-		}
-	}
-	return NULL;
-}
 
 
 

@@ -65,7 +65,7 @@ Status preprocessScript(char * file_base_name){
 
 		/* check if the current line can be a valid assembly line*/
 		if (isLineTooLong(current_line, input_file)) {
-			ASM_ERROR(line_counter, ("Line exceeds maximum length of 80 characters."));
+			ASM_ERROR(line_counter, (ERR_LINE_TOO_LONG));
 			run_status = FAILURE;
 		}
 
@@ -86,7 +86,7 @@ Status preprocessScript(char * file_base_name){
 
 				if (is_macro && strcmp(first_word, MACRO_END) == 0) {
 					if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(line_counter, ("Extraneous text after macro end directive."));
+						ASM_ERROR(line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_DECLERATION));
 						run_status = FAILURE;
 					}
 					else{
@@ -103,15 +103,15 @@ Status preprocessScript(char * file_base_name){
 
 				else if (strcmp(first_word, MACRO_START) == 0){
 					if (getNextToken(&current_line_ptr, macro_name) == FALSE) {
-						ASM_ERROR(line_counter, ("Missing macro name after macro start directive."));
+						ASM_ERROR(line_counter, (ERR_NO_MACRO_NAME));
 						run_status = FAILURE;
 					}
 					else if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(line_counter, ("Extraneous text after macro name."));
+						ASM_ERROR(line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_NAME));
 						run_status = FAILURE;
 					}
 					else if (isReservedWord(macro_name)) {
-						ASM_ERROR(line_counter, ("Macro name cannot be a reserved word."));
+						ASM_ERROR(line_counter, (ERR_MACRO_NAME_RESERVED_WORD));
 						run_status = FAILURE;
 					}
 					else{

@@ -82,5 +82,19 @@
 #define ERR_CANNOT_CREATE_ENTRIES_FILE "Error: Cannot create entries file %s\n"
 #define ERR_CANNOT_CREATE_EXTERNALS_FILE "Error: Cannot create externals file %s\n"
 
+/*
+ * preprocess messages
+ */
+#define ERR_LINE_TOO_LONG "Line exceeds maximum length of 80 characters."
+#define ERR_EXTRA_TEXT_AFTER_MACRO_DECLERATION "Extraneous text after macro end directive."
+#define ERR_NO_MACRO_NAME "Missing macro name after macro start directive."
+#define ERR_EXTRA_TEXT_AFTER_MACRO_NAME "Extraneous text after macro name."
+#define ERR_MACRO_NAME_RESERVED_WORD "Macro name cannot be a reserved word."
+
+/*
+ * extern table messages
+ */
+#define ERR_EXTERN_TABLE_MEMORY_ALLOCATION_FAILED "Memory allocation failed for extern table node.\n"
+#define ERR_EXTERN_TABLE_STRING_MEMORY_ALLOCATION_FAILED "Memory allocation failed for extern string.\n"
 
 #endif

@@ -3,7 +3,7 @@
 
 #include "consts.h"
 
-typedef struct {
+typedef struct SymbolTableEntry{
 	char* symbol;
 	int value;
 	Attribute attributes;
