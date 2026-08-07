@@ -99,11 +99,11 @@ Boolean checkMacroLine(const char *line){
 
 	int parsed_words = sscanf(line, "%s %s %s", parta, partb, partc);
 
-	if (strcmp(word1, MACRO_END_CMD) == 0){
+	if (strcmp(word1, MACRO_END) == 0){
 		return (parsed_words == 1) ? TRUE : FALSE;
 	}
 
-	if (strcmp(word1, MACRO_START_CMD) == 0){
+	if (strcmp(word1, MACRO_START) == 0){
 		return (parsed_words == 2) ? TRUE : FALSE;
 	}
 	return TRUE;

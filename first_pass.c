@@ -7,6 +7,7 @@
 #include "consts.h"
 #include "utils.h"
 #include "symbol_table.h"
+#include "messages.h"
 
 Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter);
 Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter);
@@ -38,7 +39,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 	if ((macro_file = fopen(macro_file_name, "r")) == NULL){
 		fprintf(stderr, ERR_CANNOT_OPEN_FILE, macro_file_name);
 		free(macro_file_name);
-		return FAILURE
+		return FAILURE;
 	}
 
 
@@ -187,13 +188,13 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 			data_content = atol(operands[i]);
 			if (data_content > data_content_limit_max || data_content < data_content_limit_min){
 				ASM_ERROR(line_counter, (ERR_DATA_NOT_FIT_FOR_TYPE, data_content, directive));
-				return FAILURE
+				return FAILURE;
 			}
 
 			for (byte_index = 0; byte_index < data_size; byte_index++) {
 				data_image[*dc + byte_index] = (data_content >> (byte_index * 8)) & BYTE_MASK;
 			}
-			*dc += data_size
+			*dc += data_size;
 		}
 	}
 	return SUCCESS;
@@ -235,12 +236,12 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 		}
 
 		else{
-			if(existing_symbol->entry.attributes & ATTR_CODE){
-				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE, existing_symbol->entry.name));
+			if(existing_symbol->symbol_table_entry.attributes & ATTR_CODE){
+				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE, existing_symbol->symbol_table_entry.name));
 				return FAILURE;
 			}
-			if(existing_symbol->entry.attributes & ATTR_DATA){
-				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA, existing_symbol->entry.name));
+			if(existing_symbol->symbol_table_entry.attributes & ATTR_DATA){
+				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA, existing_symbol->symbol_table_entry.name));
 				return FAILURE;
 			}
 		}
@@ -413,8 +414,8 @@ void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
 	SymbolTableNode *current = symbol_table;
 	if (symbol_table == NULL) return;
 	while (current != NULL) {
-		if (current->entry.attributes & ATTR_DATA) {
-			current->entry.value += icf;
+		if (current->symbol_table_entry.attributes & ATTR_DATA) {
+			current->symbol_table_entry.value += icf;
 		}
 		current = current->next;
 	}

@@ -18,7 +18,7 @@ typedef struct SymbolTableNode{
 typedef SymbolTableNode* SymbolTable;
 
 
-Status addEntryToSymbolTable(SymbolTable symbol_table, SymbolTableEntry new_entry);
+Status addEntryToSymbolTable(SymbolTable *symbol_table, SymbolTableEntry new_entry);
 
 void freeSymbolTable(SymbolTable* symbol_table);
 

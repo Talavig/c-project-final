@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "symbol_table.h"
 #include "extern_table.h"
+#include "messages.h"
 
 Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_counter);
 Status encodeCodeTraversalInstructions(char **line, char *instruction_name, SymbolTable *symbol_table, int ic, unsigned long *code_image, ExternTable *extern_table, int line_counter);
@@ -25,10 +26,10 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 	int line_counter = 0;
 
 	macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
-	if ((macro_file = fopen(file_name, "r")) == NULL){
+	if ((macro_file = fopen(macro_file_name, "r")) == NULL){
 		fprintf(stderr, ERR_CANNOT_OPEN_FILE, macro_file_name);
 		free(macro_file_name);
-		return FAILURE
+		return FAILURE;
 	}
 
 	while (fgets(current_line, sizeof(current_line), macro_file) != NULL) {
@@ -36,7 +37,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 		current_line_ptr = current_line;
 
 
-		if (isLineTooLong(current_line, am_file)) {
+		if (isLineTooLong(current_line, macro_file)) {
 			ASM_ERROR(line_counter, ("Line exceeds maximum length of 80 characters."));
 			pass_status = FAILURE;
 		}
@@ -92,12 +93,12 @@ Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_cou
 		return FAILURE;
 	}
 
-	if (symbol_node->entry.attributes & EXTERNAL) {
+	if (symbol_node->symbol_table_entry.attributes & EXTERNAL) {
 		ASM_ERROR(line_counter, ("Symbol '%s' cannot be both ENTRY and EXTERNAL.", label_name));
 		return FAILURE;
 	}
 
-	symbol_node->entry.attributes |= ENTRY;
+	symbol_node->symbol_table_entry.attributes |= ENTRY;
 
 	return SUCCESS;
 }
@@ -139,12 +140,12 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 				return FAILURE;
 			}
 
-			if (symbol_node->entry.attributes & EXTERNAL) {
+			if (symbol_node->symbol_table_entry.attributes & EXTERNAL) {
 				ASM_ERROR(line_counter, ("Cannot branch to external symbol '%s'.", label_name));
 				return FAILURE;
 			}
 
-			offset = symbol_node->entry.value - ic;
+			offset = symbol_node->symbol_table_entry.value - ic;
 			*machine_code |= ((unsigned long)offset & IMMED_MASK);
 			break;
 		default:
@@ -165,17 +166,17 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 				return FAILURE;
 			}
 
-			if (symbol_node->entry.attributes & EXTERNAL) {
-				strcpy(ext_entry.symbol, label_name);
-				ext_entry.address = ic;
+			if (symbol_node->symbol_table_entry.attributes & EXTERNAL) {
+				strcpy(extern_entry.symbol, label_name);
+				extern_entry.address = ic;
 
-				if (addEntryToExternTable(extern_table, ext_entry) == FAILURE) {
+				if (addEntryToExternTable(extern_table, extern_entry) == FAILURE) {
 					ASM_ERROR(line_counter, ("Failed to record external symbol usage."));
 					return FAILURE;
 				}
 			}
 			else {
-				target_address = symbol_node->entry.value;
+				target_address = symbol_node->symbol_table_entry.value;
 				*machine_code |= ((unsigned long)(target_address & ADDRESS_MASK));
 			}
 			break;

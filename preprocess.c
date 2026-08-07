@@ -54,7 +54,7 @@ Status preprocessScript(char * file_base_name){
 		fclose(input_file);
 		free(input_file_name);
 		free(output_file_name);
-		return FAILURE
+		return FAILURE;
 	}
 
 	while (fgets(current_line, sizeof(current_line), input_file) != NULL){
