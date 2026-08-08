@@ -186,7 +186,7 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 char *createFileName(char *base_name, char *extension){
 	char *full_name = (char *)malloc(strlen(base_name) + strlen(extension) + 1);
 	if (full_name == NULL) {
-		fprintf(stderr, "Error: Memory allocation failed for file name.\n");
+		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "file name");
 		return NULL;
 	}
 	strcpy(full_name, base_name);

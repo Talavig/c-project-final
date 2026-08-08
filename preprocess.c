@@ -43,14 +43,14 @@ Status preprocessScript(char * file_base_name){
 	}
 
 	if ((input_file = fopen(input_file_name, "r")) == NULL){
-		fprintf(stderr, ERR_CANNOT_OPEN_FILE, input_file_name);
+		fprintf(stderr, ERR_FILE_OPERATION_FAILED, "open", "input", input_file_name);
 		free(input_file_name);
 		free(output_file_name);
 		return FAILURE;
 	}
 
 	if((output_file = fopen(output_file_name, "w")) == NULL){
-		fprintf(stderr, ERR_CANNOT_CREATE_FILE, output_file_name);
+		fprintf(stderr, ERR_FILE_OPERATION_FAILED, "create", "macro", output_file_name);
 		fclose(input_file);
 		free(input_file_name);
 		free(output_file_name);
@@ -86,7 +86,7 @@ Status preprocessScript(char * file_base_name){
 
 				if (is_macro && strcmp(first_word, MACRO_END) == 0) {
 					if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_DECLERATION));
+						ASM_ERROR(line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_NAME));
 						run_status = FAILURE;
 					}
 					else{

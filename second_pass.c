@@ -28,7 +28,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 
 	macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
 	if ((macro_file = fopen(macro_file_name, "r")) == NULL){
-		fprintf(stderr, ERR_CANNOT_OPEN_FILE, macro_file_name);
+		fprintf(stderr, ERR_FILE_OPERATION_FAILED, "open", "macro", macro_file_name);
 		free(macro_file_name);
 		return FAILURE;
 	}
@@ -69,7 +69,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 							}
 						}
 						else if (!isDataDirective(token) && !isExternDirective(token)){
-							ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_OR_DIRECTIVE, token));
+							ASM_ERROR(line_counter, (ERR_UNKNOWN_INST_OR_DIR, token));
 							pass_status = FAILURE;
 						}
 					}

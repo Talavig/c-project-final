@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
 		else{
 			file_base_name = (char *)malloc(file_name_len - 2);
 			if (file_base_name == NULL) {
-				fprintf(stderr, ERR_MEMORY_ALLOCATION_FILE_BASE_NAME_FAILED);
+				fprintf(stderr, ERR_MEM_ALLOC_FAILED, "file name parsing");
 			}
 			else{
 				strncpy(file_base_name, argv[i], file_name_len - 3);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]){
 				extern_table = NULL;
 
 				if (code_image == NULL || data_image == NULL) {
-					fprintf(stderr, ERR_IMAGE_MEMORY_ALLOCATION_FAILED, file_base_name);
+					fprintf(stderr, ERR_MEM_ALLOC_FAILED, "code and data images");
 					if (code_image){
 						free(code_image);
 					}
@@ -138,7 +138,7 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 
 	object_file = fopen(object_file_name, "w");
 	if (object_file == NULL) {
-		fprintf(stderr, ERR_CANNOT_CREATE_OBJECT_FILE, object_file_name);
+		fprintf(stderr, ERR_FILE_OPERATION_FAILED, "create", "object", object_file_name);
 		free(object_file_name);
 		return FAILURE;
 	}
@@ -187,7 +187,7 @@ static Status createEntriesFile(char *file_base_name, SymbolTable *symbol_table)
 				}
 				entries_file = fopen(entries_file_name, "w");
 				if (entries_file == NULL) {
-					fprintf(stderr, ERR_CANNOT_CREATE_ENTRIES_FILE, entries_file_name);
+					fprintf(stderr, ERR_FILE_OPERATION_FAILED, "create", "entries", entries_file_name);
 					free(entries_file_name);
 					return FAILURE;
 				}
@@ -223,7 +223,7 @@ static Status createExternalsFile(char *file_base_name, ExternTable *extern_tabl
 
 	externals_file = fopen(externals_file_name, "w");
 	if (externals_file == NULL) {
-		fprintf(stderr, ERR_CANNOT_CREATE_EXTERNALS_FILE, externals_file_name);
+		fprintf(stderr, ERR_FILE_OPERATION_FAILED, "create", "externals", externals_file_name);
 		free(externals_file_name);
 		return FAILURE;
 	}

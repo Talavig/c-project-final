@@ -37,7 +37,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 	}
 
 	if ((macro_file = fopen(macro_file_name, "r")) == NULL){
-		fprintf(stderr, ERR_CANNOT_OPEN_FILE, macro_file_name);
+		fprintf(stderr, ERR_FILE_OPERATION_FAILED, "open", "macro", macro_file_name);
 		free(macro_file_name);
 		return FAILURE;
 	}
@@ -149,7 +149,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 			}
 		}
 		else{
-			ASM_ERROR(line_counter, (ERR_SYMBOL_EXISTS, label_name));
+			ASM_ERROR(line_counter, (ERR_SYMBOL_ALREADY_DEFINED, label_name));
 			return FAILURE;
 		}
 	}
@@ -240,11 +240,11 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 
 		else{
 			if(existing_symbol->symbol_table_entry.attributes & CODE){
-				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_CODE, existing_symbol->symbol_table_entry.symbol));
+				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS, existing_symbol->symbol_table_entry.symbol, "code"));
 				return FAILURE;
 			}
 			if(existing_symbol->symbol_table_entry.attributes & DATA){
-				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS_DATA, existing_symbol->symbol_table_entry.symbol));
+				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS, existing_symbol->symbol_table_entry.symbol, "data"));
 				return FAILURE;
 			}
 		}
@@ -273,12 +273,12 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			code_entry.value = *ic;
 			code_entry.attributes = CODE;
 			if(addEntryToSymbolTable(symbol_table, code_entry) == FAILURE){
-				ASM_ERROR(line_counter, (ERR_DATA_DIRECTIVE_SYMBOL_ADDITION_FAILED));
+				ASM_ERROR(line_counter, (ERR_SYMBOL_ALREADY_DEFINED, label_name));
 				return FAILURE;
 			}
 		}
 		else{
-			ASM_ERROR(line_counter, (ERR_SYMBOL_DEFINED, label_name));
+			ASM_ERROR(line_counter, (ERR_SYMBOL_ALREADY_DEFINED, label_name));
 			return FAILURE;
 		}
 	}

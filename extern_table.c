@@ -12,7 +12,7 @@ ExternTable initializeExternTable() {
 Status addEntryToExternTable(ExternTable *extern_table, ExternTableEntry new_entry){
 	ExternTableNode *new_node = (ExternTableNode*)malloc(sizeof(ExternTableNode));
 	if (new_node == NULL) {
-		printf(ERR_EXTERN_TABLE_MEMORY_ALLOCATION_FAILED);
+		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "extern table node");
 		return FAILURE;
 	}
 

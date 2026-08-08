@@ -23,13 +23,13 @@ Status addMacroToTable(MacroTableEntry** start, const char* name){
 	MacroTableEntry *new_macro = (MacroTableEntry*)malloc(sizeof(MacroTableEntry));
 
 	if (new_macro == NULL) {
-		fprintf(stderr, ERR_MACRO_ALLOC_FAILED);
+		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro table entry");
 		return FAILURE;
 	}
 
 	new_macro->name = (char*)malloc(strlen(name) + 1);
 	if (new_macro->name == NULL) {
-		fprintf(stderr, ERR_MACRO_NAME_ALLOC_FAILED);
+		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro table entry's name");
 		free(new_macro);
 		return FAILURE;
 	}
@@ -52,7 +52,7 @@ Status addLineToMacro(MacroTableEntry* macro, const char* line){
 	if (macro->content == NULL){
 		macro->content = (char*)malloc(strlen(line) + 1);
 		if (macro->content == NULL) {
-			fprintf(stderr, ERR_MACRO_CONTENT_ALLOC_FAILED);
+			fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro entry content initilization");
 			return FAILURE;
 		}
 		strcpy(macro->content, line);
@@ -60,7 +60,7 @@ Status addLineToMacro(MacroTableEntry* macro, const char* line){
 	else{
 		temp_content = (char*)realloc(macro->content, strlen(macro->content) + strlen(line) + 1);
 		if (temp_content == NULL){
-			fprintf(stderr, ERR_MACRO_CONTENT_REALLOC_FAILED);
+			fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro entry content addition");
 			return FAILURE;
 		}
 		macro->content = temp_content;

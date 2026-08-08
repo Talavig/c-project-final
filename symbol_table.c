@@ -9,7 +9,7 @@
 Status addEntryToSymbolTable(SymbolTable *symbol_table, SymbolTableEntry new_entry) {
 	SymbolTableNode *new_node = (SymbolTableNode*)malloc(sizeof(SymbolTableNode));
 	if (new_node == NULL) {
-		printf(ERR_SYMBOL_TABLE_MEMORY_ALLOCATION_FAILED);
+		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "symbol table node");
 		return FAILURE;
 	}
 
