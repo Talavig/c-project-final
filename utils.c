@@ -203,7 +203,13 @@ char *createFileName(char *base_name, char *extension){
 
 Boolean isLineTooLong(const char *line, FILE *file){
 	int tmp_character;
-	if (strchr(line, '\n') == NULL && !feof(file)) {
+	if (strchr(line, '\n') == NULL) {
+		if (feof(file)) {
+			if (strlen(line) > MAX_SINGLE_LINE_LENGTH) {
+				return TRUE;
+			}
+			return FALSE;
+		}
 		while((tmp_character = fgetc(file)) != '\n' && tmp_character != EOF);
 		return TRUE;
 	}
