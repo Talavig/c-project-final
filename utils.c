@@ -240,18 +240,30 @@ char *createFileName(char *base_name, char *extension){
 
 Boolean isLineTooLong(const char *line, FILE *file){
 	int tmp_character; /*used for iterating in file*/
+	int len = strcspn(line, "\r\n");
 
-	/* does the line buffer (size 80 already) have a \n. if not, the line must be over 80 characters long */
-	if (strchr(line, '\n') == NULL) {
-		/* handle the edge case where the line is the last line of the file and has no \n */
-		if (feof(file)) {
-			if (strlen(line) > MAX_SINGLE_LINE_LENGTH) {
-				return TRUE;
+	if (len > MAX_SINGLE_LINE_LENGTH) {
+		if (strchr(line, '\n') == NULL && !feof(file)) {
+			while ((tmp_character = fgetc(file)) != '\n' && tmp_character != EOF);
+		}
+		return TRUE;
+	}
+
+	if (strchr(line, '\n') == NULL && !feof(file)) {
+		tmp_character = fgetc(file);
+
+		if (tmp_character == '\n' || tmp_character == '\r') {
+			if (tmp_character == '\r') {
+				tmp_character = fgetc(file);
+				if (tmp_character != '\n' && tmp_character != EOF) {
+					ungetc(tmp_character, file);
+				}
 			}
 			return FALSE;
 		}
-		/* line exceeds limit, clear the rest of the line from the stream */
-		while((tmp_character = fgetc(file)) != '\n' && tmp_character != EOF);
+		while (tmp_character != '\n' && tmp_character != EOF) {
+			tmp_character = fgetc(file);
+		}
 		return TRUE;
 	}
 	return FALSE;
