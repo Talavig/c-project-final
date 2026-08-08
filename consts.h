@@ -81,6 +81,8 @@
 /*
  * output formatting consts
  */
+#define BITS_IN_BYTE 8
+#define BYTES_IN_OUTPUT_LINE 4
 #define OUTPUT_HEADER_FORMAT "\t%d %d\n"
 #define OUTPUT_ADDRESS_FORMAT "%04d"
 #define OUTPUT_BYTE_FORMAT " %02X"
