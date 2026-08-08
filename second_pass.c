@@ -43,7 +43,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 			pass_status = FAILURE;
 		}
 		else{
-			current_line[strcspn(current_line, "\n")] = END_OF_STRING;
+			cleanLineEnding(current_line);
 			current_line_ptr = skipWhitespaces(current_line_ptr);
 
 			if (!isEmptyOrComment(current_line_ptr)) {

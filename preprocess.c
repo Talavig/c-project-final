@@ -86,7 +86,7 @@ Status preprocessScript(char * file_base_name){
 
 				if (is_macro && strcmp(first_word, MACRO_END) == 0) {
 					if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_NAME));
+						ASM_ERROR(line_counter, (ERR_EXTRA_CHARS_MACRO_END));
 						run_status = FAILURE;
 					}
 					else{
@@ -112,6 +112,10 @@ Status preprocessScript(char * file_base_name){
 					}
 					else if (isReservedWord(macro_name)) {
 						ASM_ERROR(line_counter, (ERR_MACRO_NAME_RESERVED_WORD));
+						run_status = FAILURE;
+					}
+					else if (findMacro(macro_table, macro_name) != NULL) {
+						ASM_ERROR(line_counter, (ERR_MACRO_ALREADY_DEFINED, macro_name));
 						run_status = FAILURE;
 					}
 					else{

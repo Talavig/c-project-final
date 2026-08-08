@@ -6,6 +6,7 @@
 
 
 char *skipWhitespaces(char *str);
+void cleanLineEnding(char *line);
 Boolean getNextToken(char **src, char *dest);
 Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *operand_count, int line_counter);
 char *createFileName(char *base_name, char *extension);

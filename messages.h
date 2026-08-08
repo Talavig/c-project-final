@@ -46,6 +46,7 @@
 #define ERR_MACRO_NAME_RESERVED_WORD "Macro name cannot be a reserved word.\n"
 #define ERR_EXTRA_TEXT_AFTER_MACRO_NAME "Extraneous text after macro name.\n"
 #define ERR_EXTRA_CHARS_MACRO_END "Extra characters after 'mcroend'.\n"
+#define ERR_MACRO_ALREADY_DEFINED "Macro '%s' already defined."
 
 /*
  * first pass data directive errors
@@ -56,6 +57,7 @@
 #define ERR_MISSING_QUOTES "Missing quotes in .asciz definition.\n"
 #define ERR_MISSING_CLOSING_QUOTES "Not found missing quote for .asciz.\n"
 #define ERR_TOO_MANY_QUOTES_IN_STRING ".asciz string has too many quotes.\n"
+#define ERR_EXTRA_CHARACTERS_AFTER_ASCIZ "Extranous text found after closing quote.\n"
 
 /*
  * first pass E directive errors

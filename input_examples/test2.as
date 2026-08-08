@@ -3,7 +3,7 @@
 
 .entry  NEXT
 .extern wNumber
-STR:    .asciz  "aBcd"
+STR:    .asciz  "aBcd" blabla
 MAIN:   add     $3,$5,$9
 LOOP:   ori     $9,-5,$2
         la      vall

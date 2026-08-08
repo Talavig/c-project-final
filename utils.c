@@ -107,6 +107,12 @@ char *skipWhitespaces(char *str) {
 	return str;
 }
 
+void cleanLineEnding(char *line) {
+	if (line != NULL) {
+		line[strcspn(line, "\r\n")] = END_OF_STRING;
+	}
+}
+
 
 Boolean getNextToken(char **line, char *token) {
 	int i = 0;

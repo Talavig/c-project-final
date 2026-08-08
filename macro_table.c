@@ -85,30 +85,3 @@ void freeMacroTable(MacroTableEntry* start){
 		current = next_entry;
 	}
 }
-
-Boolean checkMacroName(const char *name){
-	int i;
-	for (i = 0; i < NUM_INSTRUCTIONS; i++){
-		if (strcmp(instructions[i].name, name) == 0){
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-Boolean checkMacroLine(const char *line){
-	char word_a[MAX_SINGLE_LINE_LENGTH + 2] = {0};
-	char word_b[MAX_SINGLE_LINE_LENGTH + 2] = {0};
-	char word_c[MAX_SINGLE_LINE_LENGTH + 2] = {0};
-
-	int parsed_words = sscanf(line, "%s %s %s", word_a, word_b, word_c);
-
-	if (strcmp(word_a, MACRO_END) == 0){
-		return (parsed_words == 1) ? TRUE : FALSE;
-	}
-
-	if (strcmp(word_a, MACRO_START) == 0){
-		return (parsed_words == 2) ? TRUE : FALSE;
-	}
-	return TRUE;
-}

@@ -58,7 +58,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 			pass_status = FAILURE;
 		}
 		else{
-			current_line[strcspn(current_line, "\n")] = END_OF_STRING;
+			cleanLineEnding(current_line);
 			current_line_ptr = skipWhitespaces(current_line_ptr);
 			if (!isEmptyOrComment(current_line_ptr)) {
 				if (getNextToken(&current_line_ptr, token)) {
@@ -182,7 +182,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 
 		*line = last_quote + 1;
 		if (getNextToken(line, extra_word)) {
-			ASM_ERROR(line_counter, (ERR_INVALID_OPRANDS, directive));
+			ASM_ERROR(line_counter, (ERR_EXTRA_CHARACTERS_AFTER_ASCIZ));
 			return FAILURE;
 		}
 	}
