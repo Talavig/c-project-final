@@ -145,12 +145,11 @@ Status preprocessScript(char * file_base_name){
 	fclose(input_file);
 	fclose(output_file);
 	free(input_file_name);
-	freeMacroTable(&macro_table);
-
 	if (run_status == FAILURE) {
 		remove(output_file_name);
 	}
 	free(output_file_name);
+	freeMacroTable(&macro_table);
 
 	return run_status;
 }
