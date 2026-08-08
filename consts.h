@@ -44,7 +44,6 @@
 
 #define COMMENT ';'
 #define LABEL_END ':'
-#define DIRECTIVE_START '.'
 #define STRING_WRAPPER '"'
 #define END_OF_STRING '\0'
 #define REGISTER_INDICATOR '$'
