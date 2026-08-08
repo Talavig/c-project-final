@@ -6,82 +6,81 @@
 #include "consts.h"
 #include "messages.h"
 
-
-MacroTableEntry* findMacro(MacroTableEntry* start, const char* name){
-
-	MacroTableEntry *current = start;
-	while (current != NULL){
-		if (strcmp(current->name, name) == 0) {
+MacroTableNode* findMacro(MacroTable macro_table, const char *name) {
+	MacroTableNode *current = macro_table;
+	while (current != NULL) {
+		if (strcmp(current->macro_table_entry.name, name) == 0) {
 			return current;
 		}
-		current = current->next;
+		current = current->next_entry;
 	}
 	return NULL;
 }
 
-Status addMacroToTable(MacroTableEntry** start, const char* name){
-	MacroTableEntry *new_macro = (MacroTableEntry*)malloc(sizeof(MacroTableEntry));
-
-	if (new_macro == NULL) {
-		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro table entry");
+Status addMacroToTable(MacroTable *macro_table, const char *name) {
+	MacroTableNode *new_node = (MacroTableNode*)malloc(sizeof(MacroTableNode));
+	if (new_node == NULL) {
+		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro table node");
 		return FAILURE;
 	}
 
-	new_macro->name = (char*)malloc(strlen(name) + 1);
-	if (new_macro->name == NULL) {
-		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro table entry's name");
-		free(new_macro);
+	new_node->macro_table_entry.name = (char*)malloc(strlen(name) + 1);
+	if (new_node->macro_table_entry.name == NULL) {
+		fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro table entry name");
+		free(new_node);
 		return FAILURE;
 	}
-	else{
-		strcpy(new_macro->name, name);
-		new_macro->content = NULL;
-		new_macro->next = *start;
-		*start = new_macro;
-		return SUCCESS;
-	}
+
+	strcpy(new_node->macro_table_entry.name, name);
+	new_node->macro_table_entry.content = NULL;
+	new_node->next_entry = *macro_table;
+	*macro_table = new_node;
+	return SUCCESS;
 }
 
-Status addLineToMacro(MacroTableEntry* macro, const char* line){
+Status addLineToMacro(MacroTableNode *macro_node, const char *line) {
 	char *temp_content;
-
-	if (macro == NULL || line == NULL) {
+	if (macro_node == NULL || line == NULL) {
 		return FAILURE;
 	}
 
-	if (macro->content == NULL){
-		macro->content = (char*)malloc(strlen(line) + 1);
-		if (macro->content == NULL) {
-			fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro entry content initilization");
+	if (macro_node->macro_table_entry.content == NULL) {
+		macro_node->macro_table_entry.content = (char*)malloc(strlen(line) + 1);
+		if (macro_node->macro_table_entry.content == NULL) {
+			fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro entry content initialization");
 			return FAILURE;
 		}
-		strcpy(macro->content, line);
+		strcpy(macro_node->macro_table_entry.content, line);
 	}
 	else{
-		temp_content = (char*)realloc(macro->content, strlen(macro->content) + strlen(line) + 1);
-		if (temp_content == NULL){
+		temp_content = (char*)realloc(macro_node->macro_table_entry.content, strlen(macro_node->macro_table_entry.content) + strlen(line) + 1);
+		if (temp_content == NULL) {
 			fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro entry content addition");
 			return FAILURE;
 		}
-		macro->content = temp_content;
-		strcat(macro->content, line);
+		macro_node->macro_table_entry.content = temp_content;
+		strcat(macro_node->macro_table_entry.content, line);
 	}
 	return SUCCESS;
 }
 
-void freeMacroTable(MacroTableEntry* start){
-	MacroTableEntry *current = start;
-	MacroTableEntry *next_entry;
+void freeMacroTable(MacroTable *macro_table) {
+	MacroTableNode *current = *macro_table;
+	MacroTableNode *next_node;
 
-	while (current != NULL){
-		next_entry = current->next;
-		free(current->name);
-
-		if (current->content != NULL) {
-			free(current->content);
+	while (current != NULL) {
+		next_node = current->next_entry;
+		free(current->macro_table_entry.name);
+		if (current->macro_table_entry.content != NULL) {
+			free(current->macro_table_entry.content);
 		}
 		free(current);
 
-		current = next_entry;
+		current = next_node;
 	}
+	*macro_table = NULL;
 }
+
+
+
+

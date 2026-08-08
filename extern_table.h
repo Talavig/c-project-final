@@ -18,7 +18,6 @@ typedef struct ExternTableNode{
 typedef ExternTableNode* ExternTable;
 
 
-ExternTable initializeExternTable();
 Status addEntryToExternTable(ExternTable *extern_table, ExternTableEntry new_entry);
 void freeExternTable(ExternTable *extern_table);
 

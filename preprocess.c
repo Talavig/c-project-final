@@ -25,9 +25,9 @@ Status preprocessScript(char * file_base_name){
 	Status run_status = SUCCESS;
 	int line_counter = 0;
 
-	MacroTableEntry *macro_table = NULL;
-	MacroTableEntry *current_entry = NULL;
-	MacroTableEntry *found_macro = NULL;
+	MacroTable macro_table = NULL;
+	MacroTableNode *current_entry = NULL;
+	MacroTableNode *found_macro = NULL;
 
 	input_file_name = createFileName(file_base_name, INPUT_ASSEMBLY_FILE);
 	output_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
@@ -131,7 +131,7 @@ Status preprocessScript(char * file_base_name){
 				else{
 					found_macro = findMacro(macro_table, first_word);
 					if (found_macro != NULL) {
-						fputs(found_macro->content, output_file);
+						fputs(found_macro->macro_table_entry.content, output_file);
 					}
 					else{
 						fputs(current_line, output_file);
@@ -145,7 +145,7 @@ Status preprocessScript(char * file_base_name){
 	fclose(input_file);
 	fclose(output_file);
 	free(input_file_name);
-	freeMacroTable(macro_table);
+	freeMacroTable(&macro_table);
 
 	if (run_status == FAILURE) {
 		remove(output_file_name);

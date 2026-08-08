@@ -3,17 +3,30 @@
 
 #include "consts.h"
 
-typedef struct MacroTableEntry{
-	char* name;
+typedef struct {
+	char *name;
 	char *content;
-	struct MacroTableEntry *next;
-}MacroTableEntry;
+} MacroTableEntry;
 
-MacroTableEntry* findMacro(MacroTableEntry* start, const char* name);
-Status addMacroToTable(MacroTableEntry** start, const char* name);
-Status addLineToMacro(MacroTableEntry* macro, const char* line);
-void freeMacroTable(MacroTableEntry* start);
-Boolean checkMacroName(const char *name);
-Boolean checkMacroLine(const char *line);
+typedef struct MacroTableNode {
+	MacroTableEntry macro_table_entry;
+	struct MacroTableNode *next_entry;
+} MacroTableNode;
+
+typedef MacroTableNode* MacroTable;
+
+MacroTableNode* findMacro(MacroTable macro_table, const char *name);
+Status addMacroToTable(MacroTable *macro_table, const char *name);
+Status addLineToMacro(MacroTableNode *macro_node, const char *line);
+void freeMacroTable(MacroTable *macro_table);
+
+
+
+
+
+
+
+
+
 
 #endif

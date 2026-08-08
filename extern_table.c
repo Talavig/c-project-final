@@ -5,9 +5,6 @@
 #include "extern_table.h"
 #include "messages.h"
 
-ExternTable initializeExternTable() {
-	return NULL;
-}
 
 Status addEntryToExternTable(ExternTable *extern_table, ExternTableEntry new_entry){
 	ExternTableNode *new_node = (ExternTableNode*)malloc(sizeof(ExternTableNode));
