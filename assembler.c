@@ -39,17 +39,17 @@ int main(int argc, char *argv[]){
 
 	for (i = 1; i < argc; i++){
 		file_name_len = strlen(argv[i]);
-		if (file_name_len < 3 || strcmp(argv[i] + file_name_len - 3, INPUT_ASSEMBLY_FILE) != 0) {
+		if (file_name_len < FILE_EXTERNTION_LENGTH || strcmp(argv[i] + file_name_len - FILE_EXTERNTION_LENGTH, INPUT_ASSEMBLY_FILE) != 0) {
 			fprintf(stderr, ERR_INVAILD_FILE_EXTENTION, argv[i], INPUT_ASSEMBLY_FILE);
 		}
 		else{
-			file_base_name = (char *)malloc(file_name_len - 2);
+			file_base_name = (char *)malloc(file_name_len - FILE_EXTERNTION_LENGTH + 1);
 			if (file_base_name == NULL) {
 				fprintf(stderr, ERR_MEM_ALLOC_FAILED, "file name parsing");
 			}
 			else{
-				strncpy(file_base_name, argv[i], file_name_len - 3);
-				file_base_name[file_name_len - 3] = '\0';
+				strncpy(file_base_name, argv[i], file_name_len - FILE_EXTERNTION_LENGTH);
+				file_base_name[file_name_len - FILE_EXTERNTION_LENGTH] = END_OF_STRING;
 				ic = IC_INITIAL_VALUE;
 				dc = DC_INITIAL_VALUE;
 				code_image = (unsigned long *)calloc(MAX_MEMORY_SIZE / 4, sizeof(unsigned long));

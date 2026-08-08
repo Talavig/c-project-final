@@ -25,6 +25,7 @@
  * file extentions
  */
 #define INPUT_ASSEMBLY_FILE ".as"
+#define FILE_EXTERNTION_LENGTH (sizeof(".as")/sizeof(char) - 1)
 #define MACRO_ASSEMBLY_FILE ".am"
 #define OUTPUT_OBJECT_FILE ".ob"
 #define OUTPUT_EXTERNALS_FILE ".ext"
