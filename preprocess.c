@@ -30,6 +30,13 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 	MacroTableNode *current_entry = NULL;
 	MacroTableNode *found_macro = NULL;
 
+	char *macro_content = NULL;
+	char *content_copy = NULL;
+	char *line_iter = NULL;
+
+	Boolean is_macro_end;
+	Boolean handled_as_directive_or_invocation;
+
 	input_file_name = createFileName(file_base_name, INPUT_ASSEMBLY_FILE);
 	output_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
 
@@ -57,97 +64,107 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 	while (fgets(current_line, sizeof(current_line), input_file) != NULL) {
 		as_line_counter++;
 
+		is_macro_end = FALSE;
+		handled_as_directive_or_invocation = FALSE;
+
 		if (isLineTooLong(current_line, input_file)) {
 			ASM_ERROR(as_line_counter, (ERR_LINE_TOO_LONG));
 			run_status = FAILURE;
-			continue;
-		}
-
-		if (is_macro) {
-			current_line_ptr = skipWhitespaces(current_line);
-
-			if (!isEmptyOrComment(current_line_ptr)) {
-				getNextToken(&current_line_ptr, first_word);
-
-				if (strcmp(first_word, MACRO_END) == 0) {
-					if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(as_line_counter, (ERR_EXTRA_CHARS_MACRO_END));
-						run_status = FAILURE;
-					} else {
-						is_macro = FALSE;
-						current_entry = NULL;
-					}
-					continue;
-				}
-			}
-
-			if (addLineToMacro(current_entry, current_line) == FAILURE) {
-				run_status = FAILURE;
-			}
 		}
 		else {
-			current_line_ptr = skipWhitespaces(current_line);
+			if (is_macro) {
+				current_line_ptr = skipWhitespaces(current_line);
 
-			if (!isEmptyOrComment(current_line_ptr)) {
-				getNextToken(&current_line_ptr, first_word);
+				if (!isEmptyOrComment(current_line_ptr)) {
+					getNextToken(&current_line_ptr, first_word);
 
-				if (strcmp(first_word, MACRO_START) == 0) {
-					if (getNextToken(&current_line_ptr, macro_name) == FALSE) {
-						ASM_ERROR(as_line_counter, (ERR_NO_MACRO_NAME));
-						run_status = FAILURE;
-					} else if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(as_line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_NAME));
-						run_status = FAILURE;
-					} else if (isReservedWord(macro_name)) {
-						ASM_ERROR(as_line_counter, (ERR_MACRO_NAME_RESERVED_WORD));
-						run_status = FAILURE;
-					} else if (findMacro(macro_table, macro_name) != NULL) {
-						ASM_ERROR(as_line_counter, (ERR_MACRO_ALREADY_DEFINED, macro_name));
-						run_status = FAILURE;
-					} else {
-						is_macro = TRUE;
-						if (addMacroToTable(&macro_table, macro_name) == FAILURE) {
+					if (strcmp(first_word, MACRO_END) == 0) {
+						is_macro_end = TRUE;
+						if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
+							ASM_ERROR(as_line_counter, (ERR_EXTRA_CHARS_MACRO_END));
 							run_status = FAILURE;
 						} else {
-							current_entry = findMacro(macro_table, macro_name);
+							is_macro = FALSE;
+							current_entry = NULL;
 						}
 					}
-					continue;
 				}
 
-				found_macro = findMacro(macro_table, first_word);
-				if (found_macro != NULL) {
-					char *macro_content = found_macro->macro_table_entry.content;
-					if (macro_content != NULL) {
-						char *content_copy = (char *)malloc(strlen(macro_content) + 1);
-						if (content_copy == NULL) {
-							fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro content copy");
+				if (!is_macro_end) {
+					if (addLineToMacro(current_entry, current_line) == FAILURE) {
+						run_status = FAILURE;
+					}
+				}
+			}
+			else {
+				current_line_ptr = skipWhitespaces(current_line);
+
+				if (!isEmptyOrComment(current_line_ptr)) {
+					getNextToken(&current_line_ptr, first_word);
+
+					if (strcmp(first_word, MACRO_START) == 0) {
+						handled_as_directive_or_invocation = TRUE;
+
+						if (getNextToken(&current_line_ptr, macro_name) == FALSE) {
+							ASM_ERROR(as_line_counter, (ERR_NO_MACRO_NAME));
+							run_status = FAILURE;
+						} else if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
+							ASM_ERROR(as_line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_NAME));
+							run_status = FAILURE;
+						} else if (isReservedWord(macro_name)) {
+							ASM_ERROR(as_line_counter, (ERR_MACRO_NAME_RESERVED_WORD));
+							run_status = FAILURE;
+						} else if (findMacro(macro_table, macro_name) != NULL) {
+							ASM_ERROR(as_line_counter, (ERR_MACRO_ALREADY_DEFINED, macro_name));
 							run_status = FAILURE;
 						} else {
-							char *line_iter;
-							strcpy(content_copy, macro_content);
-							line_iter = strtok(content_copy, "\n");
-
-							while (line_iter != NULL) {
-								am_line_counter++;
-								if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
-									line_map[am_line_counter] = as_line_counter;
-								}
-								fprintf(output_file, "%s\n", line_iter);
-								line_iter = strtok(NULL, "\n");
+							is_macro = TRUE;
+							if (addMacroToTable(&macro_table, macro_name) == FAILURE) {
+								run_status = FAILURE;
+							} else {
+								current_entry = findMacro(macro_table, macro_name);
 							}
-							free(content_copy);
 						}
 					}
-					continue;
+					else {
+						found_macro = findMacro(macro_table, first_word);
+						if (found_macro != NULL) {
+							handled_as_directive_or_invocation = TRUE;
+							macro_content = found_macro->macro_table_entry.content;
+
+							if (macro_content != NULL) {
+								content_copy = (char *)malloc(strlen(macro_content) + 1);
+								if (content_copy == NULL) {
+									fprintf(stderr, ERR_MEM_ALLOC_FAILED, "macro content copy");
+									run_status = FAILURE;
+								} else {
+									strcpy(content_copy, macro_content);
+									line_iter = strtok(content_copy, "\n");
+
+									while (line_iter != NULL) {
+										am_line_counter++;
+										if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
+											line_map[am_line_counter] = as_line_counter;
+										}
+										fprintf(output_file, "%s\n", line_iter);
+										line_iter = strtok(NULL, "\n");
+									}
+									free(content_copy);
+									content_copy = NULL;
+								}
+							}
+						}
+					}
+				}
+
+				if (!handled_as_directive_or_invocation) {
+					am_line_counter++;
+					if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
+						line_map[am_line_counter] = as_line_counter;
+					}
+					fputs(current_line, output_file);
 				}
 			}
-
-			am_line_counter++;
-			if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
-				line_map[am_line_counter] = as_line_counter;
-			}
-			fputs(current_line, output_file);
 		}
 	}
 
