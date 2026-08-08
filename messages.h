@@ -1,6 +1,11 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
+/*
+ * macro used for clean error printing with line number
+ * line_num: the line in which the error occured
+ * args: the error string itself and any arguments that may be formatted into it
+ */
 #define ASM_ERROR(line_num, args) \
     do { \
         printf("Error in line %d: ", line_num); \
@@ -8,6 +13,11 @@
         printf("\n"); \
     } while(0)
 
+/*
+ * macro used for clean warning printing with line number
+ * line_num: the line in which the error occured
+ * args: the error string itself and any arguments that may be formatted into it
+ */
 #define ASM_WARNING(line_num, args) \
     do { \
         printf("Warning in line %d: ", line_num); \
