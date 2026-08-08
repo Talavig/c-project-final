@@ -149,7 +149,7 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
 	for (i = 0; i < instruction_count; i++) {
 		fprintf(object_file, OUTPUT_ADDRESS_FORMAT, current_address);
 		for (j = 0; j < 4; j++) {
-			fprintf(object_file, OUTPUT_BYTE_FORMAT, (unsigned int)((code_image[i] >> (j * 8)) & 0xFF));
+			fprintf(object_file, OUTPUT_BYTE_FORMAT, (unsigned int)((code_image[i] >> (j * 8)) & BYTE_MASK));
 		}
 		fprintf(object_file, "\n");
 		current_address += INSTRUCTION_BYTES_SIZE;

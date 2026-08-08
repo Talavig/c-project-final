@@ -144,7 +144,6 @@ Status encodeCodeTraversalInstructions(char **line, char *instruction_name, Symb
 			}
 
 			if (symbol_node->symbol_table_entry.attributes & EXTERNAL) {
-				printf("%d\n",symbol_node->symbol_table_entry.attributes);
 				ASM_ERROR(line_counter, (ERR_BRANCH_TO_EXTERN, label_name));
 				return FAILURE;
 			}
