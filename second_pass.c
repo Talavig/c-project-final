@@ -43,18 +43,18 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 			pass_status = FAILURE;
 		}
 		else{
-			current_line[strcspn(current_line, "\n")] = '\0';
+			current_line[strcspn(current_line, "\n")] = END_OF_STRING;
 			current_line_ptr = skipWhitespaces(current_line_ptr);
 
 			if (!isEmptyOrComment(current_line_ptr)) {
 				if (getNextToken(&current_line_ptr, token)) {
 					if (isLabelDef(token)) {
 						if (!getNextToken(&current_line_ptr, token)) {
-							token[0] = '\0';
+							token[0] = END_OF_STRING;
 						}
 					}
 
-					if (token[0] != '\0') {
+					if (token[0] != END_OF_STRING) {
 						if (isEntryDirective(token)) {
 							if (handleEntryDirective(&current_line_ptr, symbol_table, line_counter) == FAILURE) {
 								pass_status = FAILURE;

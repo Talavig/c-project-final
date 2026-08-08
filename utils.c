@@ -63,7 +63,7 @@ Boolean parseRegister(const char *str, int *reg_num) {
 
 	parsed_val = strtol(str + 1, &endp, 10);
 
-	if (*endp != '\0') {
+	if (*endp != END_OF_STRING) {
 		return FALSE;
 	}
 
@@ -80,13 +80,13 @@ Boolean parseImmediate(const char *str, int *val) {
 	char *endp;
 	long parsed_val;
 
-	if (str == NULL || *str == '\0') {
+	if (str == NULL || *str == END_OF_STRING) {
 		return FALSE;
 	}
 
 	parsed_val = strtol(str, &endp, 10);
 
-	if (*endp != '\0') {
+	if (*endp != END_OF_STRING) {
 		return FALSE;
 	}
 
@@ -101,7 +101,7 @@ Boolean parseImmediate(const char *str, int *val) {
 char *skipWhitespaces(char *str) {
 	if (str == NULL) return NULL;
 
-	while (*str != '\0' && isspace((unsigned char)*str)) {
+	while (*str != END_OF_STRING && isspace((unsigned char)*str)) {
 		str++;
 	}
 	return str;
@@ -112,23 +112,23 @@ Boolean getNextToken(char **line, char *token) {
 	int i = 0;
 	char *ptr = *line;
 
-	while (*ptr != '\0' && isspace((unsigned char)*ptr)) {
+	while (*ptr != END_OF_STRING && isspace((unsigned char)*ptr)) {
 		ptr++;
 	}
 
-	if (*ptr == '\0' || *ptr == '\n' || *ptr == '\r') {
-		token[0] = '\0';
+	if (*ptr == END_OF_STRING || *ptr == '\n' || *ptr == '\r') {
+		token[0] = END_OF_STRING;
 		return FALSE;
 	}
 
-	while (*ptr != '\0' && !isspace((unsigned char)*ptr) && *ptr != ',' && *ptr != '\r' && *ptr != '\n') {
+	while (*ptr != END_OF_STRING && !isspace((unsigned char)*ptr) && *ptr != ',' && *ptr != '\r' && *ptr != '\n') {
 		if (i < MAX_TOKEN_LENGTH - 1) {
 			token[i++] = *ptr;
 		}
 		ptr++;
 	}
 
-	token[i] = '\0';
+	token[i] = END_OF_STRING;
 	*line = ptr;
 	return TRUE;
 }
@@ -138,11 +138,11 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 	Boolean expect_comma = FALSE;
 	*operand_count = 0;
 	memset(operands, 0, MAX_OPERANDS_PER_LINE * MAX_TOKEN_LENGTH * sizeof(char));
-	while (**line != '\0' && isspace((unsigned char)**line)) {
+	while (**line != END_OF_STRING && isspace((unsigned char)**line)) {
 		(*line)++;
 	}
 
-	while (**line != '\0'){
+	while (**line != END_OF_STRING){
 		if (**line == ','){
 			if (expect_comma){
 				(*line)++;
@@ -171,7 +171,7 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 
 		}
 
-		while (**line != '\0' && isspace((unsigned char)**line)){
+		while (**line != END_OF_STRING && isspace((unsigned char)**line)){
 			(*line)++;
 		}
 
@@ -261,7 +261,7 @@ Boolean isReservedWord(char *word){
 Boolean isValidLabel(char *str){
 	const char *ptr = str;
 
-	if (str == NULL || *str == '\0') {
+	if (str == NULL || *str == END_OF_STRING) {
 		return FALSE;
 	}
 
@@ -273,7 +273,7 @@ Boolean isValidLabel(char *str){
 		return FALSE;
 	}
 
-	while (*ptr != '\0') {
+	while (*ptr != END_OF_STRING) {
 		if (!isalnum((unsigned char)*ptr)) {
 			return FALSE;
 		}

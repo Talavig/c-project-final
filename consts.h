@@ -18,7 +18,7 @@
 #define MAX_TOKEN_LENGTH 32 /* 31 for max label + 1 for \0*/
 #define MAX_ASSEMBLY_LINE_COUNT 10000
 #define MAX_SINGLE_LINE_LENGTH 80
-#define MAX_OPERANDS_PER_LINE 40 /* derived from 80 - 3 chars for data decleration / 2 for comma and value*/
+#define MAX_OPERANDS_PER_LINE (MAX_SINGLE_LINE_LENGTH / 2) /* derived from line len / 2 for comma and value*/
 
 
 /*
@@ -47,8 +47,6 @@
 #define DIRECTIVE_START '.'
 #define STRING_WRAPPER '"'
 #define END_OF_STRING '\0'
-#define POSITIVE_NUMBER '+'
-#define NEGATIVE_NUMBER '-'
 #define REGISTER_INDICATOR '$'
 
 
@@ -64,6 +62,30 @@
 #define ENTRY_DIRECTIVE ".entry"
 #define EXTERN_DIRECTIVE ".extern"
 
+/*
+ * bit masks % shift consts
+ */
+
+#define OPCODE_SHIFT 26
+#define RS_SHIFT 21
+#define RT_SHIFT 16
+#define RD_SHIFT 11
+#define FUNCT_SHIFT 6
+#define REG_JUMP_SHIFT 25
+
+#define BYTE_MASK 0xFF
+#define IMMED_MASK 0xFFFF
+#define ADDRESS_MASK 0x1FFFFFF
+#define MAX_IMMED_VALUE (IMMED_MASK >> 1)
+#define MIN_IMMED_VALUE (-MAX_IMMED_VALUE - 1)
+
+/*
+ * output formatting consts
+ */
+#define OUTPUT_HEADER_FORMAT "\t%d %d\n"
+#define OUTPUT_ADDRESS_FORMAT "%04d"
+#define OUTPUT_BYTE_FORMAT " %02X"
+#define OUTPUT_SYMBOL_FORMAT "%s %04d\n"
 
 /*
  * instruction opcodes and functs
@@ -72,8 +94,7 @@
 #define R_INSTRUCTIONS_ARITHMATIC_OPCODES 0
 #define R_INSTRUCTIONS_MEMORY_OPCODES 1
 #define NON_R_FUNCT_VALUE 0
-#define MAX_IMMED_VALUE (IMMED_MASK >> 1)
-#define MIN_IMMED_VALUE (-MAX_IMMED_VALUE - 1)
+
 
 typedef enum R_INSTRUCTIONS_ARITHMATIC_FUNCTS {
 	ADD=1,
@@ -124,20 +145,6 @@ typedef enum {
 	EXTERNAL = 8
 } Attribute;
 
-typedef enum {
-	FALSE,
-	TRUE
-} Boolean;
-
-typedef enum {
-	FAILURE,
-	SUCCESS
-} Status;
-
-/*
- * connsts for specific command types
- *
- */
 
 typedef enum {
 	R_TYPE,
@@ -157,33 +164,18 @@ extern Instruction instructions[];
 extern const int NUM_INSTRUCTIONS;
 
 /*
- * bitshift consts
+ * control flow
  */
 
-#define OPCODE_SHIFT 26
-#define RS_SHIFT 21
-#define RT_SHIFT 16
-#define RD_SHIFT 11
-#define FUNCT_SHIFT 6
-#define REG_JUMP_SHIFT 25
+typedef enum {
+	FALSE,
+	TRUE
+} Boolean;
 
-#define BYTE_MASK 0xFF
-#define IMMED_MASK 0xFFFF
-#define ADDRESS_MASK 0x1FFFFFF
+typedef enum {
+	FAILURE,
+	SUCCESS
+} Status;
 
-#define CODE_IMAGE_SIZE 4096
-#define DATA_IMAGE_SIZE 4096
-
-/*
- * output files consts
- */
-
-#define PRINT_MASK_32 0xFFFFFFFF
-#define PRINT_MASK_8 0xFF
-
-#define OUTPUT_HEADER_FORMAT "\t%d %d\n"
-#define OUTPUT_CODE_FORMAT "%04d %08lX\n"
-#define OUTPUT_DATA_FORMAT "%04d %02X\n"
-#define OUTPUT_SYMBOL_FORMAT "%s %04d\n"
 
 #endif

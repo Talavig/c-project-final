@@ -58,14 +58,14 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 			pass_status = FAILURE;
 		}
 		else{
-			current_line[strcspn(current_line, "\n")] = '\0';
+			current_line[strcspn(current_line, "\n")] = END_OF_STRING;
 			current_line_ptr = skipWhitespaces(current_line_ptr);
 			if (!isEmptyOrComment(current_line_ptr)) {
 				if (getNextToken(&current_line_ptr, token)) {
 					token_len = strlen(token);
 					if (isLabelDef(token)){
 						has_label = TRUE;
-						token[token_len - 1] = '\0';
+						token[token_len - 1] = END_OF_STRING;
 						if (!isValidLabel(token)) {
 							ASM_ERROR(line_counter, (ERR_INVALID_LABEL_NAME, token));
 							pass_status = FAILURE;
@@ -79,7 +79,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 							}
 						}
 					}
-					if (token[0] != '\0'){
+					if (token[0] != END_OF_STRING){
 						if(isDataDirective(token)){
 							if(handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_counter) == FAILURE){
 								pass_status = FAILURE;
@@ -132,6 +132,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 	long data_content_limit_min;
 	long data_content_limit_max;
 	int byte_index;
+	char* endp;
 
 	data_size = (strcmp(directive, DB_DIRECTIVE) == 0) ? DB_SIZE : (strcmp(directive, DH_DIRECTIVE) == 0) ? DH_SIZE : DW_SIZE;
 	data_content_limit_min = (strcmp(directive, DB_DIRECTIVE) == 0) ? SCHAR_MIN : (strcmp(directive, DH_DIRECTIVE) == 0) ? SHRT_MIN : INT_MIN;
@@ -175,7 +176,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 			line_ptr++;
 			tmp_dc++;
 		}
-		data_image[tmp_dc] = '\0';
+		data_image[tmp_dc] = END_OF_STRING;
 		*dc = tmp_dc + 1;
 	}
 	else{
@@ -188,7 +189,12 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 		}
 
 		for(i = 0; i < operand_count; i++){
-			data_content = atol(operands[i]);
+			data_content = strtol(operands[i], &endp, 10);
+			if (operands[i] == endp || *endp != END_OF_STRING){
+				ASM_ERROR(line_counter, (ERR_INVALID_OPRANDS, directive));
+				return FAILURE;
+			}
+
 			if (data_content > data_content_limit_max || data_content < data_content_limit_min){
 				ASM_ERROR(line_counter, (ERR_DATA_NOT_FIT_FOR_TYPE, data_content, directive));
 				return FAILURE;
