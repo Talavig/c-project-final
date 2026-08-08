@@ -15,7 +15,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 void updateDataSymbolAddresses(SymbolTable symbol_table, int icf);
 
 
-Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image){
+Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image, int *line_map){
 	FILE *macro_file;
 	char* macro_file_name;
 
@@ -29,6 +29,7 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 	Boolean has_label =  FALSE;
 	Status pass_status = SUCCESS;
 	int line_counter = 0;
+	int line_in_as;
 
 
 	macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
@@ -48,13 +49,14 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 
 	while (fgets(current_line, sizeof(current_line), macro_file) != NULL){
 		line_counter++;
+		line_in_as = line_map[line_counter];
 		has_label = FALSE;
 		current_line_ptr = current_line;
 		memset(label_name, 0, sizeof(label_name));
 		memset(token, 0, sizeof(token));
 
 		if (isLineTooLong(current_line, macro_file)) {
-			ASM_ERROR(line_counter, (ERR_LINE_TOO_LONG));
+			ASM_ERROR(line_in_as, (ERR_LINE_TOO_LONG));
 			pass_status = FAILURE;
 		}
 		else{
@@ -67,36 +69,36 @@ Status firstPass(char * file_base_name, SymbolTable* symbol_table, int* ic, int*
 						has_label = TRUE;
 						token[token_len - 1] = END_OF_STRING;
 						if (!isValidLabel(token)) {
-							ASM_ERROR(line_counter, (ERR_INVALID_LABEL_NAME, token));
+							ASM_ERROR(line_in_as, (ERR_INVALID_LABEL_NAME, token));
 							pass_status = FAILURE;
 							getNextToken(&current_line_ptr, token);
 						}
 						else{
 							strcpy(label_name, token);
 							if (!getNextToken(&current_line_ptr, token)){
-								ASM_ERROR(line_counter, (ERR_INCOMPLETE_LABEL));
+								ASM_ERROR(line_in_as, (ERR_INCOMPLETE_LABEL));
 								pass_status = FAILURE;
 							}
 						}
 					}
 					if (token[0] != END_OF_STRING){
 						if(isDataDirective(token)){
-							if(handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_counter) == FAILURE){
+							if(handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_in_as) == FAILURE){
 								pass_status = FAILURE;
 							}
 						}
 						else if (isExternDirective(token) || isEntryDirective(token)) {
-							if (handleEDirective(&current_line_ptr, token, has_label, label_name, symbol_table, data_image, line_counter) == FAILURE) {
+							if (handleEDirective(&current_line_ptr, token, has_label, label_name, symbol_table, data_image, line_in_as) == FAILURE) {
 								pass_status = FAILURE;
 							}
 						}
 						else if(isInstruction(token)){
-							if(handleInstruction(&current_line_ptr, token, has_label, label_name, symbol_table, ic, code_image, line_counter) == FAILURE){
+							if(handleInstruction(&current_line_ptr, token, has_label, label_name, symbol_table, ic, code_image, line_in_as) == FAILURE){
 								pass_status = FAILURE;
 							}
 						}
 						else{
-							ASM_ERROR(line_counter, (ERR_UNKNOWN_INST_OR_DIR, token));
+							ASM_ERROR(line_in_as, (ERR_UNKNOWN_INST_OR_DIR, token));
 							pass_status = FAILURE;
 						}
 					}

@@ -9,7 +9,7 @@
 #include "messages.h"
 
 
-Status preprocessScript(char * file_base_name){
+Status preprocessScript(char *file_base_name, int *line_map){
 	FILE * input_file;
 	FILE * output_file;
 	char* input_file_name = NULL;
@@ -23,7 +23,8 @@ Status preprocessScript(char * file_base_name){
 
 	Boolean is_macro = FALSE;
 	Status run_status = SUCCESS;
-	int line_counter = 0;
+	int as_line_counter = 0;
+	int am_line_counter = 0;
 
 	MacroTable macro_table = NULL;
 	MacroTableNode *current_entry = NULL;
@@ -60,12 +61,12 @@ Status preprocessScript(char * file_base_name){
 	while (fgets(current_line, sizeof(current_line), input_file) != NULL){
 
 		/* increment line count, reset first word buffer */
-		line_counter++;
+		as_line_counter++;
 		current_line_ptr = current_line;
 
 		/* check if the current line can be a valid assembly line*/
 		if (isLineTooLong(current_line, input_file)) {
-			ASM_ERROR(line_counter, (ERR_LINE_TOO_LONG));
+			ASM_ERROR(as_line_counter, (ERR_LINE_TOO_LONG));
 			run_status = FAILURE;
 		}
 
@@ -77,6 +78,10 @@ Status preprocessScript(char * file_base_name){
 						run_status = FAILURE;
 					}
 					else{
+						am_line_counter++;
+						if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
+							line_map[am_line_counter] = as_line_counter;
+						}
 						fputs(current_line, output_file);
 					}
 				}
@@ -86,7 +91,7 @@ Status preprocessScript(char * file_base_name){
 
 				if (is_macro && strcmp(first_word, MACRO_END) == 0) {
 					if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(line_counter, (ERR_EXTRA_CHARS_MACRO_END));
+						ASM_ERROR(as_line_counter, (ERR_EXTRA_CHARS_MACRO_END));
 						run_status = FAILURE;
 					}
 					else{
@@ -103,19 +108,19 @@ Status preprocessScript(char * file_base_name){
 
 				else if (strcmp(first_word, MACRO_START) == 0){
 					if (getNextToken(&current_line_ptr, macro_name) == FALSE) {
-						ASM_ERROR(line_counter, (ERR_NO_MACRO_NAME));
+						ASM_ERROR(as_line_counter, (ERR_NO_MACRO_NAME));
 						run_status = FAILURE;
 					}
 					else if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
-						ASM_ERROR(line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_NAME));
+						ASM_ERROR(as_line_counter, (ERR_EXTRA_TEXT_AFTER_MACRO_NAME));
 						run_status = FAILURE;
 					}
 					else if (isReservedWord(macro_name)) {
-						ASM_ERROR(line_counter, (ERR_MACRO_NAME_RESERVED_WORD));
+						ASM_ERROR(as_line_counter, (ERR_MACRO_NAME_RESERVED_WORD));
 						run_status = FAILURE;
 					}
 					else if (findMacro(macro_table, macro_name) != NULL) {
-						ASM_ERROR(line_counter, (ERR_MACRO_ALREADY_DEFINED, macro_name));
+						ASM_ERROR(as_line_counter, (ERR_MACRO_ALREADY_DEFINED, macro_name));
 						run_status = FAILURE;
 					}
 					else{
@@ -130,6 +135,10 @@ Status preprocessScript(char * file_base_name){
 				}
 				else{
 					found_macro = findMacro(macro_table, first_word);
+					am_line_counter++;
+					if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
+						line_map[am_line_counter] = as_line_counter;
+					}
 					if (found_macro != NULL) {
 						fputs(found_macro->macro_table_entry.content, output_file);
 					}

@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
 	unsigned char * data_image;
 	int file_name_len;
 	char *file_base_name;
+	int am_to_as_line[MAX_ASSEMBLY_LINE_COUNT + 1];
 
 
 	if (argc < 2){
@@ -67,13 +68,13 @@ int main(int argc, char *argv[]){
 				}
 				else{
 					printf(INFO_ASSEMBLING, argv[i]);
-					if(preprocessScript(file_base_name) == FAILURE){
+					if(preprocessScript(file_base_name , am_to_as_line) == FAILURE){
 						printf(PREPROCESSING_ERRORS_FOUND, argv[i]);
 					}
-					else if (firstPass(file_base_name, &symbol_table, &ic, &dc, data_image, code_image) == FAILURE){
+					else if (firstPass(file_base_name, &symbol_table, &ic, &dc, data_image, code_image, am_to_as_line) == FAILURE){
 						printf(FIRST_PASS_ERRORS_FOUND, argv[i]);
 					}
-					else if (secondPass(file_base_name, &symbol_table, code_image, &extern_table) == FAILURE) {
+					else if (secondPass(file_base_name, &symbol_table, code_image, &extern_table, am_to_as_line) == FAILURE) {
 						printf(SECOND_PASS_ERRORS_FOUND, argv[i]);
 					}
 					else{

@@ -13,7 +13,7 @@
 Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_counter);
 Status encodeCodeTraversalInstructions(char **line, char *instruction_name, SymbolTable *symbol_table, int ic, unsigned long *code_image, ExternTable *extern_table, int line_counter);
 
-Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long *code_image, ExternTable *extern_table) {
+Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long *code_image, ExternTable *extern_table, int *line_map) {
 	FILE *macro_file;
 	char *macro_file_name;
 
@@ -25,6 +25,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 
 	Status pass_status = SUCCESS;
 	int line_counter = 0;
+	int line_in_as;
 
 	macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
 	if ((macro_file = fopen(macro_file_name, "r")) == NULL){
@@ -35,11 +36,12 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 
 	while (fgets(current_line, sizeof(current_line), macro_file) != NULL) {
 		line_counter++;
+		line_in_as = line_map[line_counter];
 		current_line_ptr = current_line;
 
 
 		if (isLineTooLong(current_line, macro_file)) {
-			ASM_ERROR(line_counter, (ERR_LINE_TOO_LONG));
+			ASM_ERROR(line_in_as, (ERR_LINE_TOO_LONG));
 			pass_status = FAILURE;
 		}
 		else{
@@ -56,12 +58,12 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 
 					if (token[0] != END_OF_STRING) {
 						if (isEntryDirective(token)) {
-							if (handleEntryDirective(&current_line_ptr, symbol_table, line_counter) == FAILURE) {
+							if (handleEntryDirective(&current_line_ptr, symbol_table, line_in_as) == FAILURE) {
 								pass_status = FAILURE;
 							}
 						}
 						else if (isInstruction(token)) {
-							if (encodeCodeTraversalInstructions(&current_line_ptr, token, symbol_table, second_pass_ic, code_image, extern_table, line_counter) == FAILURE) {
+							if (encodeCodeTraversalInstructions(&current_line_ptr, token, symbol_table, second_pass_ic, code_image, extern_table, line_in_as) == FAILURE) {
 								pass_status = FAILURE;
 							}
 							else{
@@ -69,7 +71,7 @@ Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long
 							}
 						}
 						else if (!isDataDirective(token) && !isExternDirective(token)){
-							ASM_ERROR(line_counter, (ERR_UNKNOWN_INST_OR_DIR, token));
+							ASM_ERROR(line_in_as, (ERR_UNKNOWN_INST_OR_DIR, token));
 							pass_status = FAILURE;
 						}
 					}

@@ -6,6 +6,6 @@
 
 
 
-Status preprocessScript(char * file_base_name);
+Status preprocessScript(char *file_base_name, int *line_map);
 
 #endif
