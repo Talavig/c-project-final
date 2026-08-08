@@ -133,6 +133,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 	long data_content_limit_max;
 	int byte_index;
 	char* endp;
+	char extra_word[MAX_TOKEN_LENGTH];
 
 	data_size = (strcmp(directive, DB_DIRECTIVE) == 0) ? DB_SIZE : (strcmp(directive, DH_DIRECTIVE) == 0) ? DH_SIZE : DW_SIZE;
 	data_content_limit_min = (strcmp(directive, DB_DIRECTIVE) == 0) ? SCHAR_MIN : (strcmp(directive, DH_DIRECTIVE) == 0) ? SHRT_MIN : INT_MIN;
@@ -178,6 +179,12 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 		}
 		data_image[tmp_dc] = END_OF_STRING;
 		*dc = tmp_dc + 1;
+
+		*line = last_quote + 1;
+		if (getNextToken(line, extra_word)) {
+			ASM_ERROR(line_counter, (ERR_INVALID_OPRANDS, directive));
+			return FAILURE;
+		}
 	}
 	else{
 		if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE){
