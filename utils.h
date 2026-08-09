@@ -49,7 +49,7 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 char *createFileName(char *base_name, char *extension);
 
 /*
- * check if a line exceeds the maximum allowed length as shown in manual
+ * check if a line exceeds the maximum allowed length as shown in manual, including \r\n new lines
  * safely handle edge cases such as reaching EOF without a newline character, and clear the remainder of the long line from the input buffer
  * line: the line buffer that was read
  * file: the file pointer being read from

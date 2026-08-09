@@ -14,29 +14,30 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 	char *input_file_name = NULL;
 	char *output_file_name = NULL;
 
-	char current_line[MAX_SINGLE_LINE_LENGTH + 10];
-	char *current_line_ptr;
+	char current_line[MAX_SINGLE_LINE_LENGTH + 4]; /* buffer for current line (with extra space for handling special edge cases with line length)*/
+	char *current_line_ptr; /* a pointer used to look at the linr */
 	char first_word[MAX_TOKEN_LENGTH];
 	char macro_name[MAX_TOKEN_LENGTH];
-	char extra_word[MAX_TOKEN_LENGTH];
+	char extra_word[MAX_TOKEN_LENGTH]; /* a buffer for holding extranous words if found*/
 
-	Boolean is_macro = FALSE;
-	Status run_status = SUCCESS;
+	Boolean is_macro = FALSE; /* track if we are currently inside a mcro block*/
+	Status run_status = SUCCESS; /* track status of the whole preprocessing stage*/
 
-	int as_line_counter = 0;
-	int am_line_counter = 0;
+	int as_line_counter = 0; /* counts lines in the as file*/
+	int am_line_counter = 0; /* counts file in the newly created am file*/
 
-	MacroTable macro_table = NULL;
-	MacroTableNode *current_entry = NULL;
-	MacroTableNode *found_macro = NULL;
+	MacroTable macro_table = NULL; /* created macro table for current file*/
+	MacroTableNode *current_entry = NULL; /* pointer to the current macro in the linked list*/
+	MacroTableNode *found_macro = NULL; /* used for looking up macros in the macro table*/
 
 	char *macro_content = NULL;
 	char *content_copy = NULL;
-	char *line_iter = NULL;
+	char *line_tokenizer = NULL;
 
-	Boolean is_macro_end;
-	Boolean handled_as_directive_or_invocation;
+	Boolean is_macro_end; /* used to follow if we finished with a macro*/
+	Boolean not_macro_line; /* used to follow if current line was handled as a part of a macro */
 
+	/* create output file names and open input & output files for read & write respectively*/
 	input_file_name = createFileName(file_base_name, INPUT_ASSEMBLY_FILE);
 	output_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
 
@@ -61,29 +62,38 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 		return FAILURE;
 	}
 
+	/* iterate over the lines of the input file*/
 	while (fgets(current_line, sizeof(current_line), input_file) != NULL) {
+		/* advance th original file's line counter*/
 		as_line_counter++;
 
+		/* set flow flags for line*/
 		is_macro_end = FALSE;
-		handled_as_directive_or_invocation = FALSE;
+		not_macro_line = FALSE;
 
+		/* check if line is too long*/
 		if (isLineTooLong(current_line, input_file)) {
 			ASM_ERROR(as_line_counter, (ERR_LINE_TOO_LONG));
 			run_status = FAILURE;
 		}
 		else {
+			/* check if currently in middle of expanding a macro*/
 			if (is_macro) {
 				current_line_ptr = skipWhitespaces(current_line);
 
+				/* we skip empty lines and comments in am file creating as defined in manual*/
 				if (!isEmptyOrComment(current_line_ptr)) {
 					getNextToken(&current_line_ptr, first_word);
 
+					/* check if this line closes the macro definition*/
 					if (strcmp(first_word, MACRO_END) == 0) {
+						/* raise macro end flag, check if there are extra words after macro end*/
 						is_macro_end = TRUE;
 						if (getNextToken(&current_line_ptr, extra_word) == TRUE) {
 							ASM_ERROR(as_line_counter, (ERR_EXTRA_CHARS_MACRO_END));
 							run_status = FAILURE;
-						} else {
+						}
+						else {
 							is_macro = FALSE;
 							current_entry = NULL;
 						}
@@ -103,7 +113,7 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 					getNextToken(&current_line_ptr, first_word);
 
 					if (strcmp(first_word, MACRO_START) == 0) {
-						handled_as_directive_or_invocation = TRUE;
+						not_macro_line = TRUE;
 
 						if (getNextToken(&current_line_ptr, macro_name) == FALSE) {
 							ASM_ERROR(as_line_counter, (ERR_NO_MACRO_NAME));
@@ -129,7 +139,7 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 					else {
 						found_macro = findMacro(macro_table, first_word);
 						if (found_macro != NULL) {
-							handled_as_directive_or_invocation = TRUE;
+							not_macro_line = TRUE;
 							macro_content = found_macro->macro_table_entry.content;
 
 							if (macro_content != NULL) {
@@ -139,15 +149,15 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 									run_status = FAILURE;
 								} else {
 									strcpy(content_copy, macro_content);
-									line_iter = strtok(content_copy, "\n");
+									line_tokenizer = strtok(content_copy, "\n");
 
-									while (line_iter != NULL) {
+									while (line_tokenizer != NULL) {
 										am_line_counter++;
 										if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
 											line_map[am_line_counter] = as_line_counter;
 										}
-										fprintf(output_file, "%s\n", line_iter);
-										line_iter = strtok(NULL, "\n");
+										fprintf(output_file, "%s\n", line_tokenizer);
+										line_tokenizer = strtok(NULL, "\n");
 									}
 									free(content_copy);
 									content_copy = NULL;
@@ -157,7 +167,7 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 					}
 				}
 
-				if (!handled_as_directive_or_invocation) {
+				if (!not_macro_line) {
 					am_line_counter++;
 					if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
 						line_map[am_line_counter] = as_line_counter;

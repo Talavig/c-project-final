@@ -240,32 +240,46 @@ char *createFileName(char *base_name, char *extension){
 
 Boolean isLineTooLong(const char *line, FILE *file){
 	int tmp_character; /*used for iterating in file*/
-	int len = strcspn(line, "\r\n");
+	int len = strcspn(line, "\r\n"); /* counter characters until first appearence of /r or /n*/
 
+	/* is the line until the new line character more than MAX_SINGLE_LINE_LENGTH long*/
 	if (len > MAX_SINGLE_LINE_LENGTH) {
+		/* the line we read has more than 80 characters, which means we need to clead the file buffer and return TRUE*/
 		if (strchr(line, '\n') == NULL && !feof(file)) {
 			while ((tmp_character = fgetc(file)) != '\n' && tmp_character != EOF);
 		}
 		return TRUE;
 	}
 
+	/* edge case where the line is 80 characters long,*/
 	if (strchr(line, '\n') == NULL && !feof(file)) {
+		/* look at the next character in the file after the end of the file stream we already read*/
 		tmp_character = fgetc(file);
 
+		/* if that file is part of a new line*/
 		if (tmp_character == '\n' || tmp_character == '\r') {
+			/* if its a \r, move the file pointer to the supposed \n */
 			if (tmp_character == '\r') {
 				tmp_character = fgetc(file);
+				/* if we got to the \n and we are at the end of a file, return the extra character to the file buffer*/
 				if (tmp_character != '\n' && tmp_character != EOF) {
 					ungetc(tmp_character, file);
 				}
 			}
+
+			/* the line is exactly 80 characters*/
 			return FALSE;
 		}
+
+		/* the next character is a regular character, and so we flush the file buffer*/
 		while (tmp_character != '\n' && tmp_character != EOF) {
 			tmp_character = fgetc(file);
 		}
+
+		/* the line is too long*/
 		return TRUE;
 	}
+	/* no newline found, but this is the final line so we got to a legal length without a \n*/
 	return FALSE;
 }
 
