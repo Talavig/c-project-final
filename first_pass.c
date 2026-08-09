@@ -139,7 +139,18 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 }
 
 /*
+ * handle data directives (.db, .dh, .dw, .asciz)
+ * parse the operands, validate them, and encode them to machine code i the data image
+ * in addition, updates the data counter
+ * line: pointer to the current position in the line buffer
+ * directive: data directive used
+ * has_label: is the line starting with a label
+ * symbol_table: pointer to the symbol table
+ * dc: pointer to the data counter
+ * data_image: the data_image array
+ * line_counter: the current line in the as file as extracted by the line map
  *
+ * return SUCCESS if parsed and encoded correctly, FAILURE on syntax or memory errors.
  */
 Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter){
 	SymbolTableEntry data_entry = {0}; /* the symbol struct of new entry*/
@@ -261,18 +272,32 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 }
 
 /*
+ * handle extern and entry directives
+ * parse the oprand, validate it, add to the extern table if necessary
+ * line: pointer to the current position in the line buffer
+ * directive: the directive string
+ * has_label: is the line starting with a label
+ * label_name: name of the label (if has_label is TRUE)
+ * symbol_table: pointer to the symbol table
+ * data_image: data image array
+ * line_counter: the current line in the as file as extracted by the line map
  *
+ * return SUCCESS if valid, FAILURE on syntax errors or symbol collisions
  */
 Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter){
+	/* variables used in operand extraction*/
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
+
 	SymbolTableNode *existing_symbol;
 	SymbolTableEntry new_entry = {0};
 
+	/* if a label is defined before extern, warn about it but to not exit */
 	if (has_label) {
 		ASM_WARNING(line_counter, (WARN_LABEL_BEFORE_DIRECTIVE, label_name, directive));
 	}
 
+	/*get the extern oprands and check exactly one is provided*/
 	if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE) {
 		return FAILURE;
 	}
@@ -286,8 +311,12 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 		return FAILURE;
 	}
 
+	/* if extern directive*/
 	if (strcmp(directive, EXTERN_DIRECTIVE) == 0){
+		/* look for extern value in the symbol table*/
 		existing_symbol = findSymbol(*symbol_table, operands[0]);
+
+		/* if symbol doest not exist, add it to the symbol table and return SUCCESS if done successfully */
 		if(existing_symbol == NULL){
 			strcpy(new_entry.symbol, operands[0]);
 			new_entry.value = 0;
@@ -299,6 +328,7 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 		}
 
 		else{
+			/* check if symbol is already defined as code or data, which is illegal*/
 			if(existing_symbol->symbol_table_entry.attributes & CODE){
 				ASM_ERROR(line_counter, (ERR_EXISTING_EXTERN_SYBOL_EXISTS, existing_symbol->symbol_table_entry.symbol, "code"));
 				return FAILURE;
@@ -308,9 +338,11 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 				return FAILURE;
 			}
 		}
+		/* the symbol we saw is not data or code, but is already in the table, so we return SUCCESS*/
 		return SUCCESS;
 	}
 
+	/* if entry, will be fully handled in second pass, so we ignore it and return SUCCESS*/
 	else if (strcmp(directive, ENTRY_DIRECTIVE) == 0) {
 		return SUCCESS;
 	}
@@ -318,7 +350,22 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 }
 
 /*
+ * parse and encode instruction to machine code.
+ * specifically, turn them into 32 bit values like explained in the manual.
+ * parse instruction and operands, validate them, and encode them to machine code in the code image.
+ * in addition, if there is a label, add it to the symbol table
  *
+ *
+ * line: pointer to the current position in the line buffer
+ * instruction_name: name  of  instruction
+ * has_label: is the line starting with a label
+ * label_name: name of the label (if has_label is TRUE)
+ * symbol_table: pointer to the symbol table
+ * ic pointer to the instruction counter
+ * data_image: code image array
+ * line_counter: the current line in the as file as extracted by the line map
+ *  *
+ * return SUCCESS if parsed and encoded correctly, FAILURE on syntax or operand errors
  */
 Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter){
 	SymbolTableEntry code_entry;
@@ -474,12 +521,16 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 }
 
 /*
+ * update the addresses of data symbols in symbol table after first pass,
+ * by adding to tit the final value of the instruction counter
  *
+ * symbol_table: the symbol table to update
+ * icf: the final instruction counter value
  */
 void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
 	SymbolTableNode *current = symbol_table; /* a pointer to the symbol node's linked list */
 
-	/* if the table is empty, break immidiately */
+	/* if the table is empty, break immediately */
 	if (symbol_table == NULL){
 		return;
 	}
