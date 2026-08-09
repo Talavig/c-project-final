@@ -38,7 +38,7 @@ void freeSymbolTable(SymbolTable* symbol_table){
 	*symbol_table = NULL;
 }
 
-SymbolTableNode* findSymbol(SymbolTable symbol_table, char *symbol_name){
+SymbolTableNode* findSymbol(SymbolTable symbol_table, const char *symbol_name){
 	SymbolTableNode *current = symbol_table; /* a pointer to the current node looked in the table*/
 
 	/* iterate over all items in the linked list */

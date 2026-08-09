@@ -10,8 +10,8 @@
 #include "second_pass.h"
 
 /* function prototypes for internal handlers */
-Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_counter);
-Status encodeCodeTraversalInstructions(char **line, char *instruction_name, SymbolTable *symbol_table, int ic, unsigned long *code_image, ExternTable *extern_table, int line_counter);
+static Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_counter);
+static Status encodeCodeTraversalInstructions(char **line, char *instruction_name, SymbolTable *symbol_table, int ic, unsigned long *code_image, ExternTable *extern_table, int line_counter);
 
 Status secondPass(char *macro_file_name, SymbolTable *symbol_table, unsigned long *code_image, ExternTable *extern_table, int *line_map) {
 	FILE *macro_file;
@@ -99,7 +99,7 @@ Status secondPass(char *macro_file_name, SymbolTable *symbol_table, unsigned lon
  * line_counter: original line number in the .as file (for errors)
  * return SUCCESS if successfully marked as entry, FAILURE on conflicts or missing symbols
  */
-Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_counter) {
+static Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_counter) {
 	char label_name[MAX_TOKEN_LENGTH];
 	SymbolTableNode *symbol_node;
 
@@ -142,7 +142,7 @@ Status handleEntryDirective(char **line, SymbolTable *symbol_table, int line_cou
  * line_counter: original line number in the .as file (for errors)
  * return: SUCCESS if address resolution is successful, FAILURE if the label is missing or illegal.
  */
-Status encodeCodeTraversalInstructions(char **line, char *instruction_name, SymbolTable *symbol_table, int ic, unsigned long *code_image, ExternTable *extern_table, int line_counter){
+static Status encodeCodeTraversalInstructions(char **line, char *instruction_name, SymbolTable *symbol_table, int ic, unsigned long *code_image, ExternTable *extern_table, int line_counter){
 	Instruction *instruction;
 	/* variables used in operand extraction*/
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];

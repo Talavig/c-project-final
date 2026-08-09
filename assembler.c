@@ -12,11 +12,11 @@
 #include "second_pass.h"
 
 /* function prototypes for file generation */
-Status generate_output_files(char *file_base_name, SymbolTable *symbol_table, ExternTable *extern_table, int ic, int dc, unsigned char *data_image, unsigned long *code_image);
+static Status generate_output_files(const char *file_base_name, SymbolTable *symbol_table, ExternTable *extern_table, int ic, int dc, unsigned char *data_image, unsigned long *code_image);
 
-static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned char *data_image, unsigned long *code_image);
-static Status createEntriesFile(char *file_base_name, SymbolTable *symbol_table);
-static Status createExternalsFile(char *file_base_name, ExternTable *extern_table);
+static Status createObjectFile(const char *file_base_name, int ic, int dc, unsigned char *data_image, unsigned long *code_image);
+static Status createEntriesFile(const char *file_base_name, SymbolTable *symbol_table);
+static Status createExternalsFile(const char *file_base_name, ExternTable *extern_table);
 
 /*
  * the main function of the assembler. handles the command line arguments, th multi pass assembly flow and the output files creation.
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
  *
  *return SUCCESS if all files created successfully, FAILURE otherwise
  */
-Status generate_output_files(char *file_base_name, SymbolTable *symbol_table, ExternTable *extern_table, int ic, int dc, unsigned char *data_image, unsigned long *code_image) {
+static Status generate_output_files(const char *file_base_name, SymbolTable *symbol_table, ExternTable *extern_table, int ic, int dc, unsigned char *data_image, unsigned long *code_image) {
 	Status files_creation_status = SUCCESS;
 
 	if (createObjectFile(file_base_name, ic, dc, data_image, code_image) == FAILURE) {
@@ -165,7 +165,7 @@ Status generate_output_files(char *file_base_name, SymbolTable *symbol_table, Ex
  *
  * return SUCCESS on success, FAILURE on file creation or writing error.
  */
-static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned char *data_image, unsigned long *code_image){
+static Status createObjectFile(const char *file_base_name, int ic, int dc, unsigned char *data_image, unsigned long *code_image){
 	FILE *object_file;
 	char *object_file_name = NULL;
 
@@ -237,7 +237,7 @@ static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned ch
  *
  * return SUCCESS on success, FAILURE on file creation or writing error.
  */
-static Status createEntriesFile(char *file_base_name, SymbolTable *symbol_table){
+static Status createEntriesFile(const char *file_base_name, SymbolTable *symbol_table){
 	FILE *entries_file;
 	char *entries_file_name;
 
@@ -283,7 +283,7 @@ static Status createEntriesFile(char *file_base_name, SymbolTable *symbol_table)
  *
  * return SUCCESS on success, FAILURE on file creation or writing error.
  */
-static Status createExternalsFile(char *file_base_name, ExternTable *extern_table){
+static Status createExternalsFile(const char *file_base_name, ExternTable *extern_table){
 	FILE *externals_file;
 	char *externals_file_name;
 

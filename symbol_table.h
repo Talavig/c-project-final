@@ -55,6 +55,6 @@ void freeSymbolTable(SymbolTable* symbol_table);
  *
  * return a pointer to the SymbolTableNode if found, NULL if the symbol does not exist
  */
-SymbolTableNode* findSymbol(SymbolTable symbol_table, char *symbol_name);
+SymbolTableNode* findSymbol(SymbolTable symbol_table, const char *symbol_name);
 
 #endif

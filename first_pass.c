@@ -10,10 +10,10 @@
 #include "messages.h"
 
 /* function prototypes for internal handlers */
-Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter);
-Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter);
-Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter);
-void updateDataSymbolAddresses(SymbolTable symbol_table, int icf);
+static Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter);
+static Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter);
+static Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter);
+static void updateDataSymbolAddresses(SymbolTable symbol_table, int icf);
 
 
 Status firstPass(char *macro_file_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image, int *line_map){
@@ -145,7 +145,7 @@ Status firstPass(char *macro_file_name, SymbolTable* symbol_table, int* ic, int*
  *
  * return SUCCESS if parsed and encoded correctly, FAILURE on syntax or memory errors.
  */
-Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter){
+static Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter){
 	SymbolTableEntry data_entry = {0}; /* the symbol struct of new entry*/
 
 	/* pointers used to find quotes in line*/
@@ -277,7 +277,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
  *
  * return SUCCESS if valid, FAILURE on syntax errors or symbol collisions
  */
-Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter){
+static Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter){
 	/* variables used in operand extraction*/
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
@@ -360,7 +360,7 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
  *  *
  * return SUCCESS if parsed and encoded correctly, FAILURE on syntax or operand errors
  */
-Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter){
+static Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter){
 	SymbolTableEntry code_entry;
 	Instruction * instruction;
 
@@ -547,7 +547,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
  * symbol_table: the symbol table to update
  * icf: the final instruction counter value
  */
-void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
+static void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
 	SymbolTableNode *current = symbol_table; /* a pointer to the symbol node's linked list */
 
 	/* if the table is empty, break immediately */

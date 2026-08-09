@@ -46,7 +46,7 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
  *
  * return a dynamically allocated string containing the full file name, or NULL an error was encountered
  */
-char *createFileName(char *base_name, char *extension);
+char *createFileName(const char *base_name, const char *extension);
 
 /*
  * check if a line exceeds the maximum allowed length as shown in manual, including \r\n new lines
@@ -64,7 +64,7 @@ Boolean isLineTooLong(const char *line, FILE *file);
  *
  * return TRUE if empty or a comment, FALSE otherwise
  */
-Boolean isEmptyOrComment(char *current_line);
+Boolean isEmptyOrComment(const char *current_line);
 
 /*
  * check if a token represents a label definition (ends with a colon)
@@ -72,7 +72,7 @@ Boolean isEmptyOrComment(char *current_line);
  *
  * return TRUE if it's a label definition, FALSE otherwise
  */
-Boolean isLabelDef(char *token);
+Boolean isLabelDef(const char *token);
 
 /*
  * check if a token is a data storage directive (.db, .dw, .dh, .asciz)
@@ -80,7 +80,7 @@ Boolean isLabelDef(char *token);
  *
  * @return TRUE if it's a data directive, FALSE otherwise
  */
-Boolean isDataDirective(char *token);
+Boolean isDataDirective(const char *token);
 
 /*
  * check if a token is an extern directive (.extern)
@@ -88,7 +88,7 @@ Boolean isDataDirective(char *token);
  *
  * return TRUE if it's an extern directive, FALSE otherwise
  */
-Boolean isExternDirective(char *token);
+Boolean isExternDirective(const char *token);
 
 /*
  * check if a token is an entry directive (.entry)
@@ -96,7 +96,7 @@ Boolean isExternDirective(char *token);
  *
  * return TRUE if it's an entry directive, FALSE otherwise
  */
-Boolean isEntryDirective(char *token);
+Boolean isEntryDirective(const char *token);
 
 /*
  * checks if a given word is a reserved word in the assembly language (instructions, registers, directives, and macro keywords)
@@ -104,7 +104,7 @@ Boolean isEntryDirective(char *token);
  *
  * return TRUE if the word is reserved, FALSE otherwise
  */
-Boolean isReservedWord(char *word);
+Boolean isReservedWord(const char *word);
 
 /*
  * validate if a given string is a legal label name:
@@ -114,7 +114,7 @@ Boolean isReservedWord(char *word);
  *
  * return TRUE if the string is a valid label, FALSE otherwise
  */
-Boolean isValidLabel(char *str);
+Boolean isValidLabel(const char *str);
 
 /*
  * parse a string to check if it represents a valid register, as definjed by the manual
@@ -140,7 +140,7 @@ Boolean parseImmediate(const char *str, int *val);
  *
  * return a pointer to the Instruction structure if found, NULL if the instruction does not exist
  */
-Instruction *getInstruction(char *instruction_name);
+Instruction *getInstruction(const char *instruction_name);
 
 /*
  * check if a token is a valid instruction name
@@ -148,6 +148,6 @@ Instruction *getInstruction(char *instruction_name);
  *
  * return TRUE if the token is an instruction, FALSE otherwise
  */
-Boolean isInstruction(char *name);
+Boolean isInstruction(const char *name);
 
 #endif

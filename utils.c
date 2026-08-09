@@ -47,7 +47,7 @@ Instruction instructions[] = {
 /*the num of instructions is calculated by the size of the instruction array divided by a single Instruction struct */
 const int NUM_INSTRUCTIONS = sizeof(instructions) / sizeof(Instruction);
 
-Instruction * getInstruction(char* instruction_name){
+Instruction * getInstruction(const char* instruction_name){
 	int i; /* a loop index */
 
 	/* iterate thought the instruction table until getting to an instruction with instruction_name, and returning a pointer to it */
@@ -223,7 +223,7 @@ Status extractOperands(char **line, char operands[][MAX_TOKEN_LENGTH], int *oper
 	return SUCCESS;
 }
 
-char *createFileName(char *base_name, char *extension){
+char *createFileName(const char *base_name, const char *extension){
 	/* allocate memory for basename + extention size + \0 */
 	char *full_name = (char *)malloc(strlen(base_name) + strlen(extension) + 1);
 
@@ -238,7 +238,7 @@ char *createFileName(char *base_name, char *extension){
 	return full_name;
 }
 
-Boolean isLineTooLong(const char *line, FILE *file){
+Boolean isLineTooLong(char *line, FILE *file){
 	int tmp_character; /*used for iterating in file*/
 	int len = strcspn(line, "\r\n"); /* counter characters until first appearence of /r or /n*/
 
@@ -283,34 +283,34 @@ Boolean isLineTooLong(const char *line, FILE *file){
 	return FALSE;
 }
 
-Boolean isEmptyOrComment(char *current_line){
+Boolean isEmptyOrComment(const char *current_line){
 	/* a comment line starts with ; */
 	return (*current_line == END_OF_STRING || *current_line == COMMENT) ? TRUE : FALSE;
 }
 
-Boolean isLabelDef(char *token){
+Boolean isLabelDef(const char *token){
 	/* a label definition must end with a : */
 	return (token[strlen(token) - 1] == LABEL_END) ? TRUE : FALSE;
 }
 
-Boolean isDataDirective(char* token){
+Boolean isDataDirective(const char* token){
 	return (strcmp(token, DB_DIRECTIVE) == 0 || strcmp(token, DW_DIRECTIVE) == 0 || strcmp(token, DH_DIRECTIVE) == 0 || strcmp(token, ASCIZ_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
-Boolean isExternDirective(char *token){
+Boolean isExternDirective(const char *token){
 	return (strcmp(token, EXTERN_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
-Boolean isEntryDirective(char *token){
+Boolean isEntryDirective(const char *token){
 	return (strcmp(token, ENTRY_DIRECTIVE) == 0) ? TRUE : FALSE;
 }
 
-Boolean isInstruction(char *token) {
+Boolean isInstruction(const char *token) {
 	return (getInstruction(token) != NULL) ? TRUE : FALSE;
 }
 
 
-Boolean isReservedWord(char *word){
+Boolean isReservedWord(const char *word){
 	int fake_reg; /* used in checking if the word is a register */
 
 	if (word == NULL) {
@@ -345,7 +345,7 @@ Boolean isReservedWord(char *word){
 	return FALSE;
 }
 
-Boolean isValidLabel(char *str){
+Boolean isValidLabel(const char *str){
 	const char *ptr = str; /* a pointer to the string */
 
 	/*is the string empty or null */
