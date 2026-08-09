@@ -9,6 +9,7 @@
 #include "symbol_table.h"
 #include "messages.h"
 
+/* function prototypes for internal handlers */
 Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter);
 Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter);
 Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter);
@@ -19,19 +20,19 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 	FILE *macro_file;
 	char* macro_file_name;
 
-	char current_line[MAX_SINGLE_LINE_LENGTH + 2];
-	char *current_line_ptr;
-	char token[MAX_TOKEN_LENGTH];
+	char current_line[MAX_SINGLE_LINE_LENGTH + 4]; /* buffer for current line (with extra space for handling special edge cases with line length)*/
+	char *current_line_ptr; /* a pointer used to look at the line */
+	char token[MAX_TOKEN_LENGTH]; /* a buffer for holding the current line token */
 	int token_len;
 	char label_name[MAX_LABEL_LENGTH];
 
 
-	Boolean has_label =  FALSE;
-	Status pass_status = SUCCESS;
-	int line_counter = 0;
-	int line_in_as;
+	Boolean has_label =  FALSE; /* track if we have a label definition in line*/
+	Status pass_status = SUCCESS; /* track status of the whole first pass stage*/
+	int line_counter = 0; /*counter used to follow am lines*/
+	int line_in_as; /*used in start of iteration to translate am line to as line */
 
-
+	/* get the am file name and open it*/
 	macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
 	if (macro_file_name == NULL) {
 		return FAILURE;
@@ -44,17 +45,23 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 	}
 
 
+	/* start ic and dc for file*/
 	*ic = IC_INITIAL_VALUE;
 	*dc = DC_INITIAL_VALUE;
 
+	/* iterate over file line by line*/
 	while (fgets(current_line, sizeof(current_line), macro_file) != NULL){
+		/* get the as line number for logging from the line map */
 		line_counter++;
 		line_in_as = line_map[line_counter];
+
+		/* initialize iteration variables and clean buffers*/
 		has_label = FALSE;
 		current_line_ptr = current_line;
 		memset(label_name, 0, sizeof(label_name));
 		memset(token, 0, sizeof(token));
 
+		/* check if line is too long*/
 		if (isLineTooLong(current_line, macro_file)) {
 			ASM_ERROR(line_in_as, (ERR_LINE_TOO_LONG));
 			pass_status = FAILURE;
@@ -62,9 +69,13 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 		else{
 			cleanLineEnding(current_line);
 			current_line_ptr = skipWhitespaces(current_line_ptr);
+
+			/* if the line is not empty, extract a token from the line*/
 			if (!isEmptyOrComment(current_line_ptr)) {
 				if (getNextToken(&current_line_ptr, token)) {
 					token_len = strlen(token);
+
+					/* if line defines a token, raise token flag, check if its name is valid, and check if the line has content besides the label definition*/
 					if (isLabelDef(token)){
 						has_label = TRUE;
 						token[token_len - 1] = END_OF_STRING;
@@ -81,22 +92,27 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 							}
 						}
 					}
+					/* there is no token definition, so we need to check what the line holds*/
 					if (token[0] != END_OF_STRING){
+						/* handle data directive*/
 						if(isDataDirective(token)){
 							if(handleDataDirective(&current_line_ptr, token, has_label, label_name, symbol_table, dc, data_image, line_in_as) == FAILURE){
 								pass_status = FAILURE;
 							}
 						}
+						/* handle E directive (for now we actually handle the extern directive, but we look at both E directives here */
 						else if (isExternDirective(token) || isEntryDirective(token)) {
 							if (handleEDirective(&current_line_ptr, token, has_label, label_name, symbol_table, data_image, line_in_as) == FAILURE) {
 								pass_status = FAILURE;
 							}
 						}
+						/* handle instruction*/
 						else if(isInstruction(token)){
 							if(handleInstruction(&current_line_ptr, token, has_label, label_name, symbol_table, ic, code_image, line_in_as) == FAILURE){
 								pass_status = FAILURE;
 							}
 						}
+						/* whatever is in this line is unknown in our assembly language*/
 						else{
 							ASM_ERROR(line_in_as, (ERR_UNKNOWN_INST_OR_DIR, token));
 							pass_status = FAILURE;
@@ -108,40 +124,53 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 		}
 	}
 
+	/* close file, free file name */
 	fclose(macro_file);
 	free(macro_file_name);
 
 	if (pass_status == FAILURE){
 		return FAILURE;
 	}
+	/*if we finish successfully, update the symbol table's data entries */
 	else{
 		updateDataSymbolAddresses(*symbol_table, *ic);
 		return SUCCESS;
 	}
 }
 
+/*
+ *
+ */
 Status handleDataDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, int *dc, unsigned char *data_image, int line_counter){
-	SymbolTableEntry data_entry = {0};
+	SymbolTableEntry data_entry = {0}; /* the symbol struct of new entry*/
+
+	/* pointers used to find quotes in line*/
 	char * first_quote;
 	char * last_quote;
 	char * line_ptr;
-	int tmp_dc = *dc;
-	int data_size;
+
+	int tmp_dc = *dc; /*hold dc value for  easier data image navigation*/
+	int data_size; /* holds the size of the current data directive content in bytes*/
+
+	/* variables used in operand extraction*/
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
+
 	int i;
 	long data_content;
 	long data_content_limit_min;
 	long data_content_limit_max;
-	int byte_index;
-	char* endp;
-	char extra_word[MAX_TOKEN_LENGTH];
+	int byte_index; /* iteration value used to determine which byte in content are we in*/
+	char* endp; /* pointer used in strtol*/
+	char extra_word[MAX_TOKEN_LENGTH]; /* a buffer for holding extranous words if found*/
 
+	/* check memory size and limits based on directive*/
 	data_size = (strcmp(directive, DB_DIRECTIVE) == 0) ? DB_SIZE : (strcmp(directive, DH_DIRECTIVE) == 0) ? DH_SIZE : DW_SIZE;
 	data_content_limit_min = (strcmp(directive, DB_DIRECTIVE) == 0) ? SCHAR_MIN : (strcmp(directive, DH_DIRECTIVE) == 0) ? SHRT_MIN : INT_MIN;
 	data_content_limit_max = (strcmp(directive, DB_DIRECTIVE) == 0) ? SCHAR_MAX : (strcmp(directive, DH_DIRECTIVE) == 0) ? SHRT_MAX : INT_MAX;
 
 
+	/*if a label is present, add it to the symbol table with the data attributes */
 	if (has_label) {
 		if (findSymbol(*symbol_table, label_name) == NULL){
 			strcpy(data_entry.symbol, label_name);
@@ -158,37 +187,47 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 		}
 	}
 
+	/* if directive is asciz string*/
 	if (strcmp(directive, ASCIZ_DIRECTIVE) == 0) {
+		/* check if there is a quote at all in the string */
 		first_quote = strchr(*line, STRING_WRAPPER);
 		if(first_quote == NULL){
 			ASM_ERROR(line_counter, (ERR_MISSING_QUOTES));
 			return FAILURE;
 		}
+		/* find first and last quote, if they match we added only one quote*/
 		last_quote = strrchr(*line, STRING_WRAPPER);
 		if(last_quote == first_quote){
 			ASM_ERROR(line_counter, (ERR_MISSING_CLOSING_QUOTES));
 			return FAILURE;
 		}
+		/* check if there are any other quotes beside the first and last one*/
 		if (strchr(first_quote + 1, STRING_WRAPPER) != last_quote) {
 			ASM_ERROR(line_counter, (ERR_TOO_MANY_QUOTES_IN_STRING));
 			return FAILURE;
 		}
+		/* copy the the characters from the string to the data image*/
 		line_ptr = first_quote + 1;
 		while(*line_ptr != STRING_WRAPPER){
+			/* put character, iterate in line, and add to temporary dc*/
 			data_image[tmp_dc] = *line_ptr;
 			line_ptr++;
 			tmp_dc++;
 		}
+		/* add null terminator and update the dc to hold all the new string data plus the eos*/
 		data_image[tmp_dc] = END_OF_STRING;
 		*dc = tmp_dc + 1;
 
+		/*cehck if there is more content after close quote in asciz directive */
 		*line = last_quote + 1;
 		if (getNextToken(line, extra_word)) {
 			ASM_ERROR(line_counter, (ERR_EXTRA_CHARACTERS_AFTER_ASCIZ));
 			return FAILURE;
 		}
 	}
+	/* data directive is d directive*/
 	else{
+		/* get operands for directive*/
 		if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE){
 			return FAILURE;
 		}
@@ -197,6 +236,7 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 			return FAILURE;
 		}
 
+		/* for each numeric operand, convert to a number and check that its in its datatype bounds*/
 		for(i = 0; i < operand_count; i++){
 			data_content = strtol(operands[i], &endp, 10);
 			if (operands[i] == endp || *endp != END_OF_STRING){
@@ -209,15 +249,20 @@ Status handleDataDirective(char **line, char *directive, Boolean has_label, char
 				return FAILURE;
 			}
 
+			/* encode each byte in 32 bit number based on the number size*/
 			for (byte_index = 0; byte_index < data_size; byte_index++) {
-				data_image[*dc + byte_index] = (data_content >> (byte_index * 8)) & BYTE_MASK;
+				data_image[*dc + byte_index] = (data_content >> (byte_index * BITS_IN_BYTE)) & BYTE_MASK;
 			}
+			/* add datasize to dc*/
 			*dc += data_size;
 		}
 	}
 	return SUCCESS;
 }
 
+/*
+ *
+ */
 Status handleEDirective(char **line, char *directive, Boolean has_label, char *label_name,SymbolTable *symbol_table, unsigned char *data_image, int line_counter){
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
@@ -272,6 +317,9 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 	return FAILURE;
 }
 
+/*
+ *
+ */
 Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter){
 	SymbolTableEntry code_entry;
 	Instruction * instruction;
@@ -425,9 +473,18 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 	return SUCCESS;
 }
 
+/*
+ *
+ */
 void updateDataSymbolAddresses(SymbolTable symbol_table, int icf) {
-	SymbolTableNode *current = symbol_table;
-	if (symbol_table == NULL) return;
+	SymbolTableNode *current = symbol_table; /* a pointer to the symbol node's linked list */
+
+	/* if the table is empty, break immidiately */
+	if (symbol_table == NULL){
+		return;
+	}
+
+	/* iterate over the linked list, if a symbol with the data attribute is found, add the ifc to it */
 	while (current != NULL) {
 		if (current->symbol_table_entry.attributes & DATA) {
 			current->symbol_table_entry.value += icf;

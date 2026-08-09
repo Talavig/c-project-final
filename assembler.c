@@ -11,6 +11,7 @@
 #include "first_pass.h"
 #include "second_pass.h"
 
+/* function prototypes for file generation */
 Status generate_output_files(char *file_base_name, SymbolTable *symbol_table, ExternTable *extern_table, int ic, int dc, unsigned char *data_image, unsigned long *code_image);
 
 static Status createObjectFile(char *file_base_name, int ic, int dc, unsigned char *data_image, unsigned long *code_image);

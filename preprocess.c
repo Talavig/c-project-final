@@ -15,7 +15,7 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 	char *output_file_name = NULL;
 
 	char current_line[MAX_SINGLE_LINE_LENGTH + 4]; /* buffer for current line (with extra space for handling special edge cases with line length)*/
-	char *current_line_ptr; /* a pointer used to look at the linr */
+	char *current_line_ptr; /* a pointer used to look at the line */
 	char first_word[MAX_TOKEN_LENGTH];
 	char macro_name[MAX_TOKEN_LENGTH];
 	char extra_word[MAX_TOKEN_LENGTH]; /* a buffer for holding extranous words if found*/
