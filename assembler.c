@@ -32,6 +32,7 @@ int main(int argc, char *argv[]){
 	int file_name_len; /* the length of the string holding the assembled file name*/
 	char *file_base_name; /* filename of assembled file without a file extention*/
 	int am_to_as_line[MAX_ASSEMBLY_LINE_COUNT + 1]; /* array used to map lines in the am file to those in the as fule for error location tracking*/
+	char * macro_file_name; /*hold the .am file name */
 
 	/* if assembler is called with no input files, exit*/
 	if (argc < 2){
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]){
 	/* go over each input file argument*/
 	for (i = 1; i < argc; i++){
 		file_name_len = strlen(argv[i]);
+		macro_file_name = NULL;
 
 		/* if the file is not an .as file, ignore it*/
 		if (file_name_len < FILE_EXTERNTION_LENGTH || strcmp(argv[i] + file_name_len - FILE_EXTERNTION_LENGTH, INPUT_ASSEMBLY_FILE) != 0) {
@@ -57,6 +59,12 @@ int main(int argc, char *argv[]){
 			else{
 				strncpy(file_base_name, argv[i], file_name_len - FILE_EXTERNTION_LENGTH);
 				file_base_name[file_name_len - FILE_EXTERNTION_LENGTH] = END_OF_STRING;
+
+				macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
+				if (macro_file_name == NULL) {
+					free(file_base_name);
+					continue;
+				}
 
 				/* initialize the ic/dc to their defined starting values, init the data structures for assembly based on the manual's reference*/
 				ic = IC_INITIAL_VALUE;
@@ -82,12 +90,12 @@ int main(int argc, char *argv[]){
 					if(preprocessScript(file_base_name , am_to_as_line) == FAILURE){
 						printf(PREPROCESSING_ERRORS_FOUND, argv[i]);
 					}
-					/* run first passs on file, which handels symbol table construction, data, extern & partial instruction handling */
-					else if (firstPass(file_base_name, &symbol_table, &ic, &dc, data_image, code_image, am_to_as_line) == FAILURE){
+					/* run first pass on file, which handels symbol table construction, data, extern & partial instruction handling */
+					else if (firstPass(macro_file_name, &symbol_table, &ic, &dc, data_image, code_image, am_to_as_line) == FAILURE){
 						printf(FIRST_PASS_ERRORS_FOUND, argv[i]);
 					}
 					/* run second pass, which includes entry and remaining instructions handling*/
-					else if (secondPass(file_base_name, &symbol_table, code_image, &extern_table, am_to_as_line) == FAILURE) {
+					else if (secondPass(macro_file_name, &symbol_table, code_image, &extern_table, am_to_as_line) == FAILURE) {
 						printf(SECOND_PASS_ERRORS_FOUND, argv[i]);
 					}
 					else{
@@ -106,8 +114,8 @@ int main(int argc, char *argv[]){
 					freeExternTable(&extern_table);
 				}
 			}
+			free(macro_file_name);
 			free(file_base_name);
-
 		}
 
 	}

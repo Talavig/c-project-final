@@ -10,7 +10,7 @@
  * 3.handle data directives and encode them to machine code
  * 4.handle extern directives by adding them to the symbol table
  * 5.handle part of the instructions (all r types, non branch I types, partial J support) and encode them to machine code
- * file_base_name: the base name of the source file
+ * macro_file_name: the name of the am file
  * symbol_table: pointer to the symbol table (linked list)
  * ic: pointer to the instruction counter
  * dc: pointer to the data counter
@@ -20,6 +20,6 @@
  *
  * return SUCCESS if the first pass completed without any errors, FAILURE otherwise
  */
-Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image, int *line_map);
+Status firstPass(char *macro_file_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image, int *line_map);
 
 #endif

@@ -16,9 +16,8 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 void updateDataSymbolAddresses(SymbolTable symbol_table, int icf);
 
 
-Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image, int *line_map){
+Status firstPass(char *macro_file_name, SymbolTable* symbol_table, int* ic, int* dc, unsigned char *data_image, unsigned long* code_image, int *line_map){
 	FILE *macro_file;
-	char* macro_file_name;
 
 	char current_line[MAX_SINGLE_LINE_LENGTH + 4]; /* buffer for current line (with extra space for handling special edge cases with line length)*/
 	char *current_line_ptr; /* a pointer used to look at the line */
@@ -32,12 +31,7 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 	int line_counter = 0; /*counter used to follow am lines*/
 	int line_in_as; /*used in start of iteration to translate am line to as line */
 
-	/* get the am file name and open it*/
-	macro_file_name = createFileName(file_base_name, MACRO_ASSEMBLY_FILE);
-	if (macro_file_name == NULL) {
-		return FAILURE;
-	}
-
+	/* open am file*/
 	if ((macro_file = fopen(macro_file_name, "r")) == NULL){
 		fprintf(stderr, ERR_FILE_OPERATION_FAILED, "open", "macro", macro_file_name);
 		free(macro_file_name);
@@ -124,9 +118,8 @@ Status firstPass(char *file_base_name, SymbolTable* symbol_table, int* ic, int* 
 		}
 	}
 
-	/* close file, free file name */
+	/* close file */
 	fclose(macro_file);
-	free(macro_file_name);
 
 	if (pass_status == FAILURE){
 		return FAILURE;

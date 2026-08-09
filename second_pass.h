@@ -13,7 +13,7 @@
  * 3. calculate relative memory offsets for conditional branches.
  * 4. record the memory addresses where external symbols are used into the extern table.
  *
- * file_base_name: the base name of the source file.
+ * macro_file_name: the base name of am file
  * symbol_table: pointer to the fully populated symbol table from the first pass
  * code_image: the code image, partially filled at the first pass
  * extern_table: pointer to the externals table
@@ -21,6 +21,6 @@
  *
  * return SUCCESS if the second pass completed without missing labels or conflicts, FAILURE otherwise
  */
-Status secondPass(char *file_base_name, SymbolTable *symbol_table, unsigned long *code_image, ExternTable *extern_table, int *line_map);
+Status secondPass(char *macro_file_name, SymbolTable *symbol_table, unsigned long *code_image, ExternTable *extern_table, int *line_map);
 
 #endif
