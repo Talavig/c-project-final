@@ -370,13 +370,19 @@ Status handleEDirective(char **line, char *directive, Boolean has_label, char *l
 Status handleInstruction(char **line, char *instruction_name, Boolean has_label, char *label_name, SymbolTable *symbol_table, int *ic, unsigned long* code_image, int line_counter){
 	SymbolTableEntry code_entry;
 	Instruction * instruction;
+
+	/* variables used in operand extraction*/
 	char operands[MAX_OPERANDS_PER_LINE][MAX_TOKEN_LENGTH];
 	int operand_count = 0;
+
+	/* variables for encoding instruction parts*/
 	unsigned long machine_code = 0;
 	int rs = 0, rt = 0, rd = 0;
 	int immed = 0;
 	int reg = 0;
 	long address = 0;
+
+	/* if a label is present, add it to the symbol table with code attribute */
 	if (has_label) {
 		if (findSymbol(*symbol_table, label_name) == NULL){
 			strcpy(code_entry.symbol,label_name);
@@ -392,11 +398,15 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			return FAILURE;
 		}
 	}
+
+	/* retrieve instruction metadata from instruction lookup table */
 	instruction = getInstruction(instruction_name);
 	if (instruction == NULL) {
 		ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_NAME, instruction_name));
 		return FAILURE;
 	}
+
+	/* get operands, check if the number of retrieved oprands matches required oprands*/
 
 	if (extractOperands(line, operands, &operand_count, line_counter) == FAILURE) {
 		return FAILURE;
@@ -412,10 +422,13 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		return FAILURE;
 	}
 
+	/* encode the opcode */
 	machine_code |= (instruction->opcode << OPCODE_SHIFT);
 
+	/* encode next fields based on command type*/
 	switch (instruction->type) {
 	case R_TYPE:
+		/* check if R type command is arithmatic or memory, and parse it accordingly*/
 		switch (instruction->opcode){
 		case R_INSTRUCTIONS_ARITHMATIC_OPCODES:
 			if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt) || !parseRegister(operands[2], &rd)){
@@ -432,10 +445,12 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 			break;
 
 		default:
+			/* we got an invalid R type opcode*/
 			ASM_ERROR(line_counter, (INVALID_R_OPCODE));
 			return FAILURE;
 		}
 
+		/* encode the R type fields into machine code like the manual shows*/
 		machine_code |= (rs << RS_SHIFT);
 		machine_code |= (rt << RT_SHIFT);
 		machine_code |= (rd << RD_SHIFT);
@@ -443,6 +458,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 		break;
 
 		case I_TYPE:
+			/* each I type has a unique opcode, all the non branching ones act the same*/
 			switch (instruction->opcode){
 			case ADDI: case SUBI: case ANDI: case ORI: case NORI: case LB: case SB: case LW: case SW: case LH: case SH:
 				if (!parseRegister(operands[0], &rs) || !parseRegister(operands[2], &rt) || !parseImmediate(operands[1], &immed)) {
@@ -450,7 +466,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 					return FAILURE;
 				}
 				break;
-
+			/* the branch ones have a two register oprands and a label oprand*/
 			case BNE: case BEQ: case BLT: case BGT:
 				if (!parseRegister(operands[0], &rs) || !parseRegister(operands[1], &rt)) {
 					ASM_ERROR(line_counter, (ERR_OPERANDS_ARE_NOT_REGISTERS, instruction->name));
@@ -463,10 +479,12 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 				break;
 
 			default:
+				/* we got an invalid I type opcode*/
 				ASM_ERROR(line_counter, (INVALID_I_OPCODE));
 				return FAILURE;
 			}
 
+			/* encode the I type fields into machine code like the manual shows*/
 			machine_code |= (rs << RS_SHIFT);
 			machine_code |= (rt << RT_SHIFT);
 			machine_code |= (immed & IMMED_MASK);
@@ -475,14 +493,17 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 
 		case J_TYPE:
 			switch (instruction->opcode){
+			/* HLT values are the defaults we set in the beginning*/
 			case HLT:
 				break;
 			case JMP:
+				/* JMP can take either a a register or a label as an oprand*/
 				if (operands[0][0] == REGISTER_INDICATOR) {
 					if (!parseRegister(operands[0], &rs)) {
 						ASM_ERROR(line_counter, (ERR_INVALID_REGISTER_JMP));
 						return FAILURE;
 					}
+					/* make the address the value of the register, and set the register flag in the command */
 					address = rs;
 					reg = 1;
 				}
@@ -494,6 +515,7 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 				}
 				break;
 
+			/* take only a label*/
 			case LA: case CALL:
 				if (!isValidLabel(operands[0])) {
 					ASM_ERROR(line_counter, (ERR_OPERAND_MUST_BE_VALID_LABEL, instruction->name));
@@ -502,20 +524,25 @@ Status handleInstruction(char **line, char *instruction_name, Boolean has_label,
 				break;
 
 			default:
+				/* we got an invalid J type opcode*/
 				ASM_ERROR(line_counter, (INVALID_J_OPCODE));
 				return FAILURE;
 			}
+			/* encode the J type fields into machine code like the manual shows*/
 			machine_code |= (reg << REG_JUMP_SHIFT);
 			machine_code |= (address & ADDRESS_MASK);
 			break;
 
 			default:
+				/* an instruction with no known type*/
 				ASM_ERROR(line_counter, (ERR_UNKNOWN_INSTRUCTION_TYPE));
 				return FAILURE;
 	}
 
+	/* save the machine code we created in the code image in the appropriate location*/
 	code_image[(*ic - IC_INITIAL_VALUE) / INSTRUCTION_BYTES_SIZE] = machine_code;
 
+	/* increment ic by instruction size in bytes*/
 	*ic += INSTRUCTION_BYTES_SIZE;
 	return SUCCESS;
 }
