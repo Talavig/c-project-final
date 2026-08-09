@@ -180,15 +180,14 @@ Status preprocessScript(char *file_base_name, int *line_map) {
 							}
 						}
 					}
-				}
-
-				/* found line has nothing to do with macro, so we add it to the line map and add to the am file*/
-				if (!is_a_macro_related_line) {
-					am_line_counter++;
-					if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
-						line_map[am_line_counter] = as_line_counter;
+					/* found line has nothing to do with macro, so we add it to the line map and add to the am file*/
+					if (!is_a_macro_related_line) {
+						am_line_counter++;
+						if (am_line_counter < MAX_ASSEMBLY_LINE_COUNT) {
+							line_map[am_line_counter] = as_line_counter;
+						}
+						fputs(current_line, output_file);
 					}
-					fputs(current_line, output_file);
 				}
 			}
 		}
